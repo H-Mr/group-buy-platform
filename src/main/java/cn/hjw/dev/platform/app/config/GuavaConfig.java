@@ -13,7 +13,6 @@ import java.util.concurrent.*;
 @Configuration
 public class GuavaConfig {
 
-    // 注入 EventBus 专用的小池子
     @Resource(name = "businessEventExecutor")
     private ExecutorService businessEventExecutor;
 
@@ -31,22 +30,6 @@ public class GuavaConfig {
     public EventBus eventBusListener() {
         // 使用 AsyncEventBus
         return new AsyncEventBus("sys-event-bus",businessEventExecutor);
-    }
-
-    /**
-     * DCC 事件总线，使用单线程池，彻底消除并发写同一 Key 的竞态问题
-     */
-    @Bean("dcc-event-bus")
-    public EventBus dccEventBus() {
-        // 使用单线程池，彻底消除并发写同一 Key 的竞态问题
-        ExecutorService eventExecutor = Executors.newSingleThreadExecutor(
-        r -> {
-            Thread t = new Thread(r, "dcc-event-worker");
-            t.setDaemon(true);
-            return t;
-        });
-        // 使用 AsyncEventBus
-        return new AsyncEventBus("dcc-event-bus",eventExecutor);
     }
 
 }
