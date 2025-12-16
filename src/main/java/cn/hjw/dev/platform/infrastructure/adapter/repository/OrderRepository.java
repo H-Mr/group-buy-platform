@@ -77,8 +77,12 @@ public class OrderRepository implements IOrderRepository {
                 .productName(order.getProductName())
                 .orderId(order.getOrderId())
                 .orderStatusVO(OrderStatusVO.valueOf(order.getStatus()))
+                .marketType(MarketTypeVO.valueOf(order.getMarketType()))
                 .orderTime(order.getOrderTime())
                 .totalAmount(order.getTotalAmount())
+                .marketDeductionAmount(order.getMarketDeductionAmount())
+                .totalAmount(order.getTotalAmount())
+                .payAmount(order.getPayAmount())
                 .payUrl(order.getPayUrl())
                 .build();
     }

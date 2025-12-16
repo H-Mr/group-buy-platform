@@ -26,7 +26,7 @@ public class DccValueManager implements BeanPostProcessor {
     /**
      * 配置前缀
      */
-    private static final String BASE_CONFIG_PATH = "group_buy_market_dcc_";
+    private static final String BASE_CONFIG_PATH_PREFIX = "DCC:";
 
     /**
      * Redisson 客户端实例，用于与 Redis 进行交互，使用redis的发布订阅功能实现动态配置更新
@@ -49,7 +49,7 @@ public class DccValueManager implements BeanPostProcessor {
      */
     public void refresh(String attribute, String value) {
 
-        String key = BASE_CONFIG_PATH.concat(attribute);
+        String key = BASE_CONFIG_PATH_PREFIX.concat(attribute);
         Object objBean = dccObjGroup.get(key);
 
         if (null == objBean) {
@@ -132,7 +132,7 @@ public class DccValueManager implements BeanPostProcessor {
             String[] splits = value.split(":");
             String attribute = splits[0];
             String defaultValue = splits.length == 2 ? splits[1] : "";
-            String configKey = BASE_CONFIG_PATH.concat(attribute); // 配置Key = 前缀 + 注解中配置的Key
+            String configKey = BASE_CONFIG_PATH_PREFIX.concat(attribute); // 配置Key = 前缀 + 注解中配置的Key
 
             // 设置值
             String finalValue = defaultValue;

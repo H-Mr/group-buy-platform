@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.hjw.dev.platform.infrastructure.dao.ISCSkuActivityDao">
 
-    <resultMap id="dataMap" type="cn.hjw.dev.platform.infrastructure.dao.po.SCSkuActivity">
+    <resultMap id="BaseResultMap" type="cn.hjw.dev.platform.infrastructure.dao.po.SCSkuActivity">
         <id column="id" property="id"/>
         <result column="source" property="source"/>
         <result column="channel" property="channel"/>
@@ -12,10 +12,32 @@
         <result column="update_time" property="updateTime"/>
     </resultMap>
 
-    <select id="querySCSkuActivityBySCGoodsId" parameterType="cn.hjw.dev.platform.infrastructure.dao.po.SCSkuActivity" resultMap="dataMap">
-        select source, channel, activity_id, goods_id
+    <sql id="Base_Column_List">
+        id, source, channel, activity_id, goods_id, create_time, update_time
+    </sql>
+
+    <select id="querySCSkuActivityBySCGoodsId" parameterType="cn.hjw.dev.platform.infrastructure.dao.po.SCSkuActivity" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/>
         from sc_sku_activity
-        where goods_id = #{goodsId} and source = #{source} and channel = #{channel}
+        where source = #{source}
+        and channel = #{channel}
+        and goods_id = #{goodsId}
     </select>
+
+    <insert id="insert" parameterType="cn.hjw.dev.platform.infrastructure.dao.po.SCSkuActivity">
+        insert into sc_sku_activity
+            (source, channel, activity_id, goods_id, create_time, update_time)
+        values
+            (#{source}, #{channel}, #{activityId}, #{goodsId}, now(), now())
+    </insert>
+
+    <update id="updateActivityId" parameterType="cn.hjw.dev.platform.infrastructure.dao.po.SCSkuActivity">
+        update sc_sku_activity
+        set activity_id = #{activityId},
+            update_time = now()
+        where source = #{source}
+          and channel = #{channel}
+          and goods_id = #{goodsId}
+    </update>
 
 </mapper>

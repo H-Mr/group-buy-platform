@@ -10,7 +10,10 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import java.util.Map;
 
-
+/**
+ * 动态配置控制器
+ * 职责：提供动态配置变更的HTTP接口
+ */
 @Slf4j
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -24,7 +27,7 @@ public class DCCController {
     private DccValueManager dccValueManager;
 
     /**
-     * 1. 动态更新配置接口
+     * 动态更新配置接口
      */
     @GetMapping("update_config")
     public Response<Boolean> updateConfig(@RequestParam("key") String key, @RequestParam("value") String value) {
@@ -47,7 +50,7 @@ public class DCCController {
     }
 
     /**
-     * 2. 【新增】查询所有配置接口 (为前端可视化准备)
+     *查询所有配置接口
      */
     @GetMapping("query_configs")
     public Response<Map<String, DccValueManager.DccMetaInfo>> queryConfigs() {

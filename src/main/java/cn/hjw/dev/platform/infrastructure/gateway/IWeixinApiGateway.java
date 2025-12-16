@@ -19,7 +19,8 @@ public interface IWeixinApiGateway {
 
 
 
-    String WEIXIN_ACCESS_TOKEN = "weixin_access_token";
+    String WEIXIN_ACCESS_TOKEN = "weixin:access_token";
+    String WEIXIN_QRCODE_TICKET_PREFIX = "weixin:auth_ticket:";
 
     /**
      * 获取 Access token

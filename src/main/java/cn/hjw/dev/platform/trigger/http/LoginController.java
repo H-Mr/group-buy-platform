@@ -13,6 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
+/**
+ * 登录控制器
+ * 负责处理登录相关的HTTP请求
+ * https://group-buy-plataform.apifox.cn
+ */
 @Slf4j
 @RestController()
 @CrossOrigin("*")
@@ -24,6 +29,7 @@ public class LoginController implements IAuthService {
 
 
     /**
+     * 获取登录二维码 ticket
      * http://xfg-studio.natapp1.cc/api/v1/login/weixin_qrcode_ticket
      * @return
      */
@@ -48,6 +54,7 @@ public class LoginController implements IAuthService {
     }
 
     /**
+     * 运行登录状态检查
      * http://xfg-studio.natapp1.cc/api/v1/login/check_login
      */
     @RequestMapping(value = "check_login", method = RequestMethod.GET)

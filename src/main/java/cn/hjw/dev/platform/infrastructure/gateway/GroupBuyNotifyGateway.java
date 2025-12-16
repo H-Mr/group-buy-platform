@@ -2,6 +2,7 @@ package cn.hjw.dev.platform.infrastructure.gateway;
 
 import cn.hjw.dev.platform.domain.inventory.event.InventoryChangedEventType;
 import cn.hjw.dev.platform.domain.inventory.model.valobj.InventoryChangedTypeVO;
+import cn.hjw.dev.platform.infrastructure.sse.SseSessionManager;
 import cn.hjw.dev.platform.types.enums.ResponseCode;
 import cn.hjw.dev.platform.types.exception.AppException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -12,6 +13,7 @@ import okhttp3.*;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +30,9 @@ public class GroupBuyNotifyGateway {
 
     @Resource
     private InventoryChangedEventType inventoryChangedEventType;
+
+    @Resource
+    private SseSessionManager sseSessionManager;
 
     /**
      * 正常是通过http回调拼团服务端接口
@@ -77,7 +82,10 @@ public class GroupBuyNotifyGateway {
            userIdListNode.forEach(userNode -> userIdList.add(userNode.asText()));
            // 3. 遍历userIdList，获取每个userId对应的商品ID列表
            for(String userId : userIdList) {
+               String msg = "group buy successful！ teamId：" + teamId;
+               sseSessionManager.sendMessage(userId, msg);
                log.info("SSE 回调通知！ userId: {} 拼团成功！ 团号：{}",userId,teamId);
+               // 扣减库存
                ArrayNode goodsIdArrayNode  = (ArrayNode) rootNode.path(userId); // 安全获取数组（不存在则返回空ArrayNode）
                goodsIdArrayNode.forEach(goodsIdNode -> inventoryChangedEventType.publishInventoryChangedEvent(
                        goodsIdNode.asText(),InventoryChangedTypeVO.DECREASE,1

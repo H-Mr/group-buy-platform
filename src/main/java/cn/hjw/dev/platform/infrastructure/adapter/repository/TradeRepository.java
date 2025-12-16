@@ -259,7 +259,7 @@ public class TradeRepository implements ITradeRepository {
             params.put("teamId", groupBuyTeamEntity.getTeamId());
             params.put("userIdList", userIdList);
             userIdList.forEach(userId -> {
-                List<String> goodsId = groupBuyOrderListDao.queryGoodsIdByUserId(userId);
+                List<String> goodsId = groupBuyOrderListDao.queryGoodsIdByUserIdAndTeamId(userId, groupBuyTeamEntity.getTeamId());
                 params.put(userId, goodsId);
             }); // 用于扣减库存
             NotifyTask notifyTask = new NotifyTask();

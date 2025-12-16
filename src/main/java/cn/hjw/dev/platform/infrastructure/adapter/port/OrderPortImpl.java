@@ -83,10 +83,10 @@ public class OrderPortImpl implements IOrderPort {
     @Override
     public GroupMarketProductPriceVO lockMarketPayOrder(LockMarketPayOrderVO lockMarketPayOrderVO) {
         LockMarketPayOrderRequestDTO requestDTO = LockMarketPayOrderRequestDTO.builder()
+                .userId(lockMarketPayOrderVO.getUserId())
                 .activityId(lockMarketPayOrderVO.getActivityId())
                 .goodsId(lockMarketPayOrderVO.getProductId())
                 .teamId(lockMarketPayOrderVO.getTeamId())
-                .userId(lockMarketPayOrderVO.getUserId())
                 .outTradeNo(lockMarketPayOrderVO.getOrderId())
                 .channel(chanel)
                 .source(source)

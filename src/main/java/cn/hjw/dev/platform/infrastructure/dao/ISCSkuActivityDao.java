@@ -12,6 +12,19 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface ISCSkuActivityDao {
 
+    /**
+     * 查询关联关系
+     */
     SCSkuActivity querySCSkuActivityBySCGoodsId(SCSkuActivity scSkuActivity);
+
+    /**
+     * 新增绑定关系
+     */
+    void insert(SCSkuActivity scSkuActivity);
+
+    /**
+     * 更新绑定的活动ID
+     */
+    int updateActivityId(SCSkuActivity scSkuActivity);
 
 }

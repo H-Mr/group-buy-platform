@@ -10,6 +10,7 @@ import cn.hjw.dev.platform.domain.order.model.valobj.MarketTypeVO;
 import cn.hjw.dev.platform.domain.order.model.valobj.OrderStatusVO;
 import cn.hjw.dev.platform.domain.order.service.IOrderService;
 import cn.hjw.dev.platform.types.enums.ResponseCode;
+import cn.hjw.dev.platform.types.utils.UserContext;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.internal.util.AlipaySignature;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,12 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+// tpgvta9856@sandbox.com
 
+/**
+ * 用户下单（token）
+ * 负责处理支付宝支付相关的HTTP请求
+ */
 @Slf4j
 @RestController()
 @CrossOrigin("*")
@@ -43,22 +49,23 @@ public class AliPayController implements IPayService {
 
 
     /**
-     * 商品下单，根据商品ID创建支付单
+     * 商品下单
      * @param createPayRequestDTO
      * @return 返回订单的支付地址
      */
     @RequestMapping(value = "create_pay_order", method =  RequestMethod.POST)
     @Override
     public Response<String> createPayOrder(@RequestBody CreatePayRequestDTO createPayRequestDTO) {
+        String userId = UserContext.getUserId();
         try {
-            log.info("商品下单，根据商品ID创建支付单开始 userId:{} productId:{}", createPayRequestDTO.getUserId(), createPayRequestDTO.getUserId());
-            String userId = createPayRequestDTO.getUserId();
+            log.info("商品下单，根据商品ID创建支付单开始 userId:{} productId:{}", userId, createPayRequestDTO.getProductId());
+            // todo 判断参数是否有效
             String productId = createPayRequestDTO.getProductId();
             // 下单，会检验是否存在未支付订单，存在则直接返回支付地址
             PayOrderEntity payOrderEntity = orderService.createOrder(ShopCartEntity.builder()
                     .userId(userId) // 用户ID
                     .productId(productId) // 商品ID
-                    .marketTypeVO(MarketTypeVO.valueOf(createPayRequestDTO.getMarketType()))
+                    .marketTypeVO(MarketTypeVO.GROUP_BUY_MARKET)
                     .activityId(createPayRequestDTO.getActivityId())
                     .teamId(createPayRequestDTO.getTeamId())
                     .build());
@@ -70,7 +77,7 @@ public class AliPayController implements IPayService {
                     .data(payOrderEntity.getPayUrl())
                     .build();
         } catch (Exception e) {
-            log.error("商品下单，根据商品ID创建支付单失败 userId:{} productId:{}", createPayRequestDTO.getUserId(), createPayRequestDTO.getUserId(), e);
+            log.error("商品下单，根据商品ID创建支付单失败 userId:{} productId:{}", userId, createPayRequestDTO.getProductId(), e);
             return Response.<String>builder()
                     .code(ResponseCode.UN_ERROR.getCode())
                     .info(ResponseCode.UN_ERROR.getInfo())
@@ -79,6 +86,7 @@ public class AliPayController implements IPayService {
     }
 
     /**
+     * 支付宝回调接口
      * 支付宝支付结果回调接口，收到回调后发布订单支付成功事件
      * @param request http请求对象
      * @return

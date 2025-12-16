@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.*;
  * @description 回调服务接口测试
  * @create 2025-01-31 08:59
  */
+
+/**
+ * 扩展使用
+ */
 @Slf4j
 @RestController()
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -16,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class TestApiClientController {
 
     /**
-     * 模拟回调案例
+     * 模拟HTTP回调
      *
      * @param notifyRequestDTO 通知回调参数
      * @return success 成功，error 失败

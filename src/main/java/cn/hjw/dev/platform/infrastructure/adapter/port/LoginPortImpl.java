@@ -40,7 +40,7 @@ public class LoginPortImpl implements ILoginPort {
     @Override
     public String createQrCodeTicket() throws IOException {
         // 1. 获取 accessToken
-        String accessToken = redisService.getValue(IWeixinApiGateway.WEIXIN_ACCESS_TOKEN); // 获取accessToken
+        String accessToken = redisService.getValue(IWeixinApiGateway.WEIXIN_ACCESS_TOKEN);
         if (null == accessToken) {
             // 重新请求获取 accessToken
             Call<WeixinTokenResponseDTO> call = weixinApiGateway.getToken("client_credential", appid, appSecret);
@@ -51,7 +51,7 @@ public class LoginPortImpl implements ILoginPort {
             redisService.setValue(IWeixinApiGateway.WEIXIN_ACCESS_TOKEN, accessToken, (weixinTokenRes.getExpires_in()*1000L) - 180000L);
         }
 
-        // 2. 生成 ticket
+        // 2. 构造请求，创建登录二维码 ticket
         WeixinQrCodeRequestDTO weixinQrCodeReq = WeixinQrCodeRequestDTO.builder()
                 .action_name(WeixinQrCodeRequestDTO.ActionNameTypeVO.QR_SCENE.getCode()) // 临时二维码
                 .action_info(WeixinQrCodeRequestDTO.ActionInfo.builder() // 场景值
@@ -61,6 +61,7 @@ public class LoginPortImpl implements ILoginPort {
                         .build())
                 .build();
 
+        // 3. 请求获取 ticket
         Call<WeixinQrCodeResponseDTO> call = weixinApiGateway.createQrCode(accessToken, weixinQrCodeReq);
         WeixinQrCodeResponseDTO weixinQrCodeRes = call.execute().body();
         assert null != weixinQrCodeRes;
@@ -77,14 +78,20 @@ public class LoginPortImpl implements ILoginPort {
     public void saveLoginState(String ticket, String openid) throws IOException {
         // 保存微信扫码登录成功状态到 Redis
         log.info("保存微信扫码登录状态 ticket：{}， openid：{}", ticket, openid);
-        redisService.setValue(ticket, openid, 5*60*1000L); // 5分钟有效期
+        redisService.setValue(IWeixinApiGateway.WEIXIN_QRCODE_TICKET_PREFIX+ticket, openid, 5*60*1000L); // 5分钟有效期
         // 发送微信登录成功事件，将发送登录成功模板消息从主流程中解耦
         weixinLoginSuccessEventTypeType.publishWeiXinSuccessEvent(openid);
     }
 
+    /**
+     * 检查登录状态
+     * @param ticket
+     * @return 是否登录
+     * @throws IOException
+     */
     @Override
     public boolean checkLoginState(String ticket) throws IOException {
-        return StringUtils.isNotBlank(redisService.getValue(ticket));
+        return StringUtils.isNotBlank(redisService.getValue(IWeixinApiGateway.WEIXIN_QRCODE_TICKET_PREFIX+ticket));
     }
 
 

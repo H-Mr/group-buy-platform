@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.hjw.dev.platform.infrastructure.dao.IGroupBuyActivityDao">
 
-    <resultMap id="dataMap" type="cn.hjw.dev.platform.infrastructure.dao.po.GroupBuyActivity">
+    <resultMap id="BaseResultMap" type="cn.hjw.dev.platform.infrastructure.dao.po.GroupBuyActivity">
         <id column="id" property="id"/>
         <result column="activity_id" property="activityId"/>
         <result column="activity_name" property="activityName"/>
@@ -20,35 +20,54 @@
         <result column="update_time" property="updateTime"/>
     </resultMap>
 
-    <select id="queryGroupBuyActivityList" resultMap="dataMap">
-        select * from group_buy_activity
-    </select>
+    <sql id="Base_Column_List">
+        id, activity_id, activity_name, discount_id, group_type, take_limit_count, target, valid_time, status, start_time, end_time, tag_id, tag_scope, create_time, update_time
+    </sql>
 
-<!--    <select id="queryValidGroupBuyActivity" parameterType="cn.hjw.dev.platform.infrastructure.dao.po.GroupBuyActivity"-->
-<!--            resultMap="dataMap">-->
-<!--        select-->
-<!--            activity_id, activity_name, discount_id, group_type, take_limit_count,-->
-<!--            target, valid_time, status, start_time, end_time, tag_id, tag_scope-->
-<!--        from group_buy_activity-->
-<!--        where source = #{source} and channel = #{channel}-->
-<!--        order by id desc-->
-<!--            limit 1-->
-<!--    </select>-->
-
-    <select id="queryValidGroupBuyActivityId" parameterType="java.lang.Long" resultMap="dataMap">
-        select
-            activity_id, activity_name, discount_id, group_type, take_limit_count,
-            target, valid_time, status, start_time, end_time, tag_id, tag_scope
+    <select id="queryGroupBuyActivityList" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/>
         from group_buy_activity
-        where activity_id = #{activityId} and status = 1
+        order by id desc
     </select>
 
-    <select id="queryGroupBuyActivityByActivityId" parameterType="java.lang.Long" resultMap="dataMap">
-        select
-            activity_id, activity_name, discount_id, group_type, take_limit_count,
-            target, valid_time, status, start_time, end_time, tag_id, tag_scope
+    <select id="queryValidGroupBuyActivityId" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/>
+        from group_buy_activity
+        where activity_id = #{activityId}
+        and status = 1
+        and now() between start_time and end_time
+    </select>
+
+    <select id="queryGroupBuyActivityByActivityId" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/>
         from group_buy_activity
         where activity_id = #{activityId}
     </select>
+
+    <insert id="insert" parameterType="cn.hjw.dev.platform.infrastructure.dao.po.GroupBuyActivity">
+        insert into group_buy_activity
+        (activity_id, activity_name, discount_id, group_type, take_limit_count, target, valid_time, status, start_time, end_time, tag_id, tag_scope, create_time, update_time)
+        values
+            (#{activityId}, #{activityName}, #{discountId}, #{groupType}, #{takeLimitCount}, #{target}, #{validTime}, #{status}, #{startTime}, #{endTime}, #{tagId}, #{tagScope}, now(), now())
+    </insert>
+
+    <update id="update" parameterType="cn.hjw.dev.platform.infrastructure.dao.po.GroupBuyActivity">
+        update group_buy_activity
+        <set>
+            <if test="activityName != null">activity_name = #{activityName},</if>
+            <if test="discountId != null">discount_id = #{discountId},</if>
+            <if test="groupType != null">group_type = #{groupType},</if>
+            <if test="takeLimitCount != null">take_limit_count = #{takeLimitCount},</if>
+            <if test="target != null">target = #{target},</if>
+            <if test="validTime != null">valid_time = #{validTime},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="tagId != null">tag_id = #{tagId},</if>
+            <if test="tagScope != null">tag_scope = #{tagScope},</if>
+            update_time = now()
+        </set>
+        where activity_id = #{activityId}
+    </update>
 
 </mapper>

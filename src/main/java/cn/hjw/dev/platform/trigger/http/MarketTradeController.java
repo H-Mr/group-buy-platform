@@ -17,10 +17,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import cn.hjw.dev.platform.types.utils.UserContext;
 
 import javax.annotation.Resource;
 import java.util.Objects;
 
+/**
+ * 扩展使用
+ */
 @Slf4j
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -34,7 +38,7 @@ public class MarketTradeController implements IMarketTradeService {
     private ITradeSettlementOrderService tradeSettlementOrderService;
 
     /**
-     * 外部系统通过http请求调用-营销交易锁单
+     * 通过HTTP调用锁单
      * @param lockMarketPayOrderRequestDTO
      * @return
      */
@@ -43,7 +47,7 @@ public class MarketTradeController implements IMarketTradeService {
     public Response<LockMarketPayOrderResponseDTO> lockMarketPayOrder(@RequestBody LockMarketPayOrderRequestDTO lockMarketPayOrderRequestDTO) {
         try {
             // 参数
-            String userId = lockMarketPayOrderRequestDTO.getUserId(); // 当前的用户id
+            String userId = lockMarketPayOrderRequestDTO.getUserId();; // 当前的用户id
             String source = lockMarketPayOrderRequestDTO.getSource(); // 来源
             String channel = lockMarketPayOrderRequestDTO.getChannel(); // 渠道
             String goodsId = lockMarketPayOrderRequestDTO.getGoodsId(); // 下单的商品id
@@ -110,13 +114,13 @@ public class MarketTradeController implements IMarketTradeService {
                     .build();
 
         } catch (AppException e) {
-            log.error("营销交易锁单业务异常:{} LockMarketPayOrderRequestDTO:{}", lockMarketPayOrderRequestDTO.getUserId(), JSON.toJSONString(lockMarketPayOrderRequestDTO), e);
+            log.error("营销交易锁单业务异常:{} LockMarketPayOrderRequestDTO:{}", UserContext.getUserId(), JSON.toJSONString(lockMarketPayOrderRequestDTO), e);
             return Response.<LockMarketPayOrderResponseDTO>builder()
                     .code(e.getCode())
                     .info(e.getInfo())
                     .build();
         } catch (Exception e) {
-            log.error("营销交易锁单服务失败:{} LockMarketPayOrderRequestDTO:{}", lockMarketPayOrderRequestDTO.getUserId(), JSON.toJSONString(lockMarketPayOrderRequestDTO), e);
+            log.error("营销交易锁单服务失败:{} LockMarketPayOrderRequestDTO:{}", UserContext.getUserId(), JSON.toJSONString(lockMarketPayOrderRequestDTO), e);
             return Response.<LockMarketPayOrderResponseDTO>builder()
                     .code(ResponseCode.UN_ERROR.getCode())
                     .info(ResponseCode.UN_ERROR.getInfo())
@@ -125,7 +129,7 @@ public class MarketTradeController implements IMarketTradeService {
     }
 
     /**
-     * 外部系统通过http请求调用-营销交易结算
+     * 通过HTTP调用结算
      */
     @PostMapping(value = "settlement_market_pay_order")
     @Override

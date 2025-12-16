@@ -14,6 +14,7 @@ import cn.hjw.dev.platform.domain.order.model.valobj.OrderStatusVO;
 import cn.hjw.dev.platform.domain.order.service.IOrderService;
 import com.alipay.api.AlipayApiException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.math.BigDecimal;
 
@@ -62,10 +63,10 @@ public abstract class AbstractOrderService implements IOrderService {
             // 已创建订单，但是没有支付地址，补全支付地址
             // todo repository 获取未支付订缺字段
             log.info("创建订单-掉单，主订单创建，支付订单没有创建，orderId: {}", unpaidOrderEntity.getOrderId());
-            Integer marketType = unpaidOrderEntity.getMarketType().getCode();
             BigDecimal payAmount = unpaidOrderEntity.getPayAmount();
             BigDecimal deductionAmount = unpaidOrderEntity.getMarketDeductionAmount();
-            if(MarketTypeVO.GROUP_BUY_MARKET.getCode().equals(marketType) && deductionAmount.equals(BigDecimal.ZERO)){
+
+            if(MarketTypeVO.GROUP_BUY_MARKET.equals(unpaidOrderEntity.getMarketType()) && deductionAmount.compareTo(BigDecimal.ZERO) == 0) {
                 // 有营销,没有优惠金额，锁定营销优惠
                 BigDecimal[] deductionAmountAndPayAmount = this.lockMarketPayOrder(unpaidOrderEntity, shopCartEntity);
                 payAmount = deductionAmountAndPayAmount[0];

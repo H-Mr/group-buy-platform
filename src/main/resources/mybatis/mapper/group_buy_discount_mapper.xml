@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.hjw.dev.platform.infrastructure.dao.IGroupBuyDiscountDao">
 
-    <resultMap id="dataMap" type="cn.hjw.dev.platform.infrastructure.dao.po.GroupBuyDiscount">
+    <resultMap id="BaseResultMap" type="cn.hjw.dev.platform.infrastructure.dao.po.GroupBuyDiscount">
         <id column="id" property="id"/>
         <result column="discount_id" property="discountId"/>
         <result column="discount_name" property="discountName"/>
@@ -15,18 +15,41 @@
         <result column="update_time" property="updateTime"/>
     </resultMap>
 
-    <select id="queryGroupBuyDiscountList" resultMap="dataMap">
-        select * from group_buy_discount
+    <sql id="Base_Column_List">
+        id,discount_id, discount_name, discount_desc, discount_type, market_plan, market_expr, tag_id, create_time, update_time
+    </sql>
+
+    <select id="queryGroupBuyDiscountList" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/>
+        from group_buy_discount
+        order by id desc
     </select>
 
-    <select id="queryGroupBuyActivityDiscountByDiscountId" parameterType="java.lang.String" resultMap="dataMap">
-        select discount_id, discount_name, discount_desc, discount_type, market_plan, market_expr, tag_id
+    <select id="queryGroupBuyActivityDiscountByDiscountId" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/>
         from group_buy_discount
         where discount_id = #{discountId}
     </select>
 
     <insert id="insertGroupBuyActivityDiscount" parameterType="cn.hjw.dev.platform.infrastructure.dao.po.GroupBuyDiscount">
-        insert into group_buy_discount (discount_name, discount_desc, discount_type, market_plan, market_expr, tag_id)
-        values (#{discountName}, #{discountDesc}, #{discountType}, #{marketPlan}, #{marketExpr}, #{tagId})
+        insert into group_buy_discount
+        (discount_id, discount_name, discount_desc, discount_type, market_plan, market_expr, tag_id, create_time, update_time)
+        values
+            (#{discountId}, #{discountName}, #{discountDesc}, #{discountType}, #{marketPlan}, #{marketExpr}, #{tagId}, now(), now())
     </insert>
+
+    <update id="updateGroupBuyActivityDiscount" parameterType="cn.hjw.dev.platform.infrastructure.dao.po.GroupBuyDiscount">
+        update group_buy_discount
+        <set>
+            <if test="discountName != null">discount_name = #{discountName},</if>
+            <if test="discountDesc != null">discount_desc = #{discountDesc},</if>
+            <if test="discountType != null">discount_type = #{discountType},</if>
+            <if test="marketPlan != null">market_plan = #{marketPlan},</if>
+            <if test="marketExpr != null">market_expr = #{marketExpr},</if>
+            <if test="tagId != null">tag_id = #{tagId},</if>
+            update_time = now()
+        </set>
+        where discount_id = #{discountId}
+    </update>
+
 </mapper>

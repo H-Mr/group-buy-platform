@@ -3,6 +3,7 @@ package cn.hjw.dev.platform.infrastructure.adapter.repository;
 import cn.hjw.dev.platform.domain.auth.adapter.repository.IAuthRepository;
 import cn.hjw.dev.platform.infrastructure.dao.IUserDao;
 import cn.hjw.dev.platform.infrastructure.dao.po.User;
+import cn.hjw.dev.platform.infrastructure.gateway.IWeixinApiGateway;
 import cn.hjw.dev.platform.infrastructure.redis.IRedisService;
 import cn.hjw.dev.platform.types.utils.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -29,11 +30,11 @@ public class AuthRepository  implements IAuthRepository {
     @Override
     public String generateToken(String ticket) {
         // 获取ticket对应的openid
-        String openid = redisService.getValue(ticket);
+        String openid = redisService.getValue(IWeixinApiGateway.WEIXIN_QRCODE_TICKET_PREFIX + ticket);
         User user = userDao.queryUserByOpenId(openid);
         if (ObjectUtils.isEmpty(user)) {
             // 注册用户
-            String userId = RandomStringUtils.randomNumeric(64); // 生成8位随机用户ID
+            String userId = RandomStringUtils.randomNumeric(64); // 生成64位随机用户ID
             this.registerUser(openid, userId);
             user = User.builder().openid(openid).userId(userId).build();
             log.info("新用户注册成功，userId：{}，openid：{}", userId, openid);

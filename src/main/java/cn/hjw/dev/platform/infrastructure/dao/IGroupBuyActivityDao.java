@@ -25,4 +25,14 @@ public interface IGroupBuyActivityDao {
      * 根据活动ID查询拼团活动
      */
     GroupBuyActivity queryGroupBuyActivityByActivityId(Long activityId);
+
+    /**
+     * 新增拼团活动
+     */
+    void insert(GroupBuyActivity groupBuyActivity);
+
+    /**
+     * 更新拼团活动
+     */
+    int update(GroupBuyActivity groupBuyActivity);
 }

@@ -85,11 +85,7 @@ public class OrderServiceImpl extends AbstractOrderService {
     public void changeOrderPaySuccess(String orderId, LocalDateTime payTime) {
         // 事务方法保证更新pay_order表时幂等性和正确性
         OrderEntity payOrderEntity = repository.changeOrder2Success(orderId, payTime);
-        if (payOrderEntity.getMarketType().equals(MarketTypeVO.GROUP_BUY_MARKET)) {
-                this.asyncDoSettlement(payOrderEntity);
-        } else {
-            inventoryChangedEventType.publishInventoryChangedEvent(payOrderEntity.getProductId(), InventoryChangedTypeVO.DECREASE,1);
-        }
+        this.asyncDoSettlement(payOrderEntity); // 默认都是营销订单，异步执行结算操作
     }
 
     /**

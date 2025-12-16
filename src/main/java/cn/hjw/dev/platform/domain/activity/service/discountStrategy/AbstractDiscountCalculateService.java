@@ -1,7 +1,6 @@
 package cn.hjw.dev.platform.domain.activity.service.discountStrategy;
 
 import cn.hjw.dev.platform.domain.activity.adapter.repository.IActivityRepository;
-import cn.hjw.dev.platform.domain.activity.model.valobj.DiscountTypeEnum;
 import cn.hjw.dev.platform.domain.activity.model.valobj.GroupBuyActivityDiscountVO;
 import cn.hjw.dev.platform.types.common.Constants;
 import lombok.extern.slf4j.Slf4j;
@@ -26,15 +25,15 @@ public abstract class AbstractDiscountCalculateService implements IDiscountCalcu
     @Override
     public BigDecimal calculateDiscountPrice(String userId, BigDecimal originalPrice, GroupBuyActivityDiscountVO.GroupBuyDiscount groupBuyDiscount) {
         // 判断折扣类型是否为标签折扣
-        if(groupBuyDiscount.getDiscountType().equals(DiscountTypeEnum.TAG)) {
-            // 会员折扣，判断用户是否满足条件
-            boolean isValidUser = fillerUserTagCondition(groupBuyDiscount.getTagId(),userId);
-            if (!isValidUser) {
-                log.info("用户不满足标签条件，无法享受该折扣，userId：{}，tagId：{}", userId, groupBuyDiscount.getTagId());
-                // 用户不满足标签条件，不适用该折扣，返回原价
-                return originalPrice;
-            }
-        }
+//        if(groupBuyDiscount.getDiscountType().equals(DiscountTypeEnum.TAG)) {
+//            // 会员折扣，判断用户是否满足条件
+//            boolean isValidUser = fillerUserTagCondition(groupBuyDiscount.getTagId(),userId);
+//            if (!isValidUser) {
+//                log.info("用户不满足标签条件，无法享受该折扣，userId：{}，tagId：{}", userId, groupBuyDiscount.getTagId());
+//                // 用户不满足标签条件，不适用该折扣，返回原价
+//                return originalPrice;
+//            }
+//        }
         BigDecimal deducePrice = doCalculate(originalPrice, groupBuyDiscount);
         if (deducePrice.compareTo(BigDecimal.ZERO) <= 0) {
             // 保证折扣价格不为负，最低支付MIN_PRICE

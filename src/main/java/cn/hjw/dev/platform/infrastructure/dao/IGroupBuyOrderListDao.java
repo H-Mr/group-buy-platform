@@ -2,6 +2,7 @@ package cn.hjw.dev.platform.infrastructure.dao;
 
 import cn.hjw.dev.platform.infrastructure.dao.po.GroupBuyOrderList;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -39,5 +40,5 @@ public interface IGroupBuyOrderListDao {
 
     List<String> queryGroupBuyCompleteOrderUserIdListByTeamId(String teamId);
 
-    List<String> queryGoodsIdByUserId(String userId);
+    List<String> queryGoodsIdByUserIdAndTeamId(@Param("userId") String userId, @Param("teamId") String teamId);
 }

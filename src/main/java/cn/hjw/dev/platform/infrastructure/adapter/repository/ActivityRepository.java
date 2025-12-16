@@ -5,14 +5,8 @@ import cn.hjw.dev.platform.domain.activity.model.valobj.DiscountTypeEnum;
 import cn.hjw.dev.platform.domain.activity.model.valobj.GroupBuyActivityDiscountVO;
 import cn.hjw.dev.platform.domain.activity.model.valobj.SCSkuActivityVO;
 import cn.hjw.dev.platform.domain.activity.model.valobj.SkuVO;
-import cn.hjw.dev.platform.infrastructure.dao.IGroupBuyActivityDao;
-import cn.hjw.dev.platform.infrastructure.dao.IGroupBuyDiscountDao;
-import cn.hjw.dev.platform.infrastructure.dao.ISCSkuActivityDao;
-import cn.hjw.dev.platform.infrastructure.dao.ISkuDao;
-import cn.hjw.dev.platform.infrastructure.dao.po.GroupBuyActivity;
-import cn.hjw.dev.platform.infrastructure.dao.po.GroupBuyDiscount;
-import cn.hjw.dev.platform.infrastructure.dao.po.SCSkuActivity;
-import cn.hjw.dev.platform.infrastructure.dao.po.Sku;
+import cn.hjw.dev.platform.infrastructure.dao.*;
+import cn.hjw.dev.platform.infrastructure.dao.po.*;
 import cn.hjw.dev.platform.infrastructure.dcc.DynamicConfigCenter;
 import cn.hjw.dev.platform.infrastructure.redis.IRedisService;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +15,7 @@ import org.redisson.api.RBitSet;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @description 活动仓储
@@ -43,6 +38,9 @@ public class ActivityRepository implements IActivityRepository {
 
     @Resource
     private DynamicConfigCenter dynamicConfigCenter;
+
+    @Resource
+    private ICouponDao couponDao;
 
     @Override
     public GroupBuyActivityDiscountVO queryGroupBuyActivityDiscountVO(Long activityId) {
@@ -137,6 +135,16 @@ public class ActivityRepository implements IActivityRepository {
     @Override
     public boolean cutRange(String userId) {
         return dynamicConfigCenter.isCutRange(userId);
+    }
+
+    @Override
+    public List<UserCoupon> queryUnusedCouponsByUserId(String userId) {
+        return couponDao.queryUnusedUserCoupons(userId);
+    }
+
+    @Override
+    public Coupon queryCouponInfo(String couponId) {
+        return couponDao.queryCouponById(couponId);
     }
 
 }

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.hjw.dev.platform.infrastructure.dao.ISkuStockDao">
+
+    <resultMap id="BaseResultMap" type="cn.hjw.dev.platform.infrastructure.dao.po.SkuStock">
+        <id column="id" property="id"/>
+        <result column="goods_id" property="goodsId"/>
+        <result column="total_count" property="totalCount"/>
+        <result column="stock_count" property="stockCount"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="queryByGoodsId" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select id, goods_id, total_count, stock_count, create_time, update_time
+        from sku_stock
+        where goods_id = #{goodsId}
+    </select>
+
+    <insert id="insert" parameterType="cn.hjw.dev.platform.infrastructure.dao.po.SkuStock">
+        insert into sku_stock
+            (goods_id, total_count, stock_count, create_time, update_time)
+        values
+            (#{goodsId}, #{totalCount}, #{stockCount}, now(), now())
+    </insert>
+
+    <update id="increaseStock">
+        update sku_stock
+        set total_count = total_count + #{count},
+            stock_count = stock_count + #{count},
+            update_time = now()
+        where goods_id = #{goodsId}
+    </update>
+
+    <update id="decrementStock">
+        update sku_stock
+        set stock_count = stock_count - #{count},
+            update_time = now()
+        where goods_id = #{goodsId}
+          and stock_count >= #{count}
+    </update>
+
+</mapper>

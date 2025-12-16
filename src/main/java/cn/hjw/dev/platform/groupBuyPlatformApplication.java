@@ -10,8 +10,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @Configurable
 @EnableAsync // 开启异步任务
 //@EnableScheduling 开启定时任务
- public class groupBuyMallApplication {
+ public class groupBuyPlatformApplication {
   public static void main(String[] args) {
-   SpringApplication.run(groupBuyMallApplication.class, args);
+   SpringApplication.run(groupBuyPlatformApplication.class, args);
   }
  }

@@ -18,4 +18,9 @@ public interface IGroupBuyDiscountDao {
 
     Integer insertGroupBuyActivityDiscount(GroupBuyDiscount groupBuyDiscount);
 
+    /**
+     * 更新折扣配置
+     */
+    int updateGroupBuyActivityDiscount(GroupBuyDiscount groupBuyDiscount);
+
 }
