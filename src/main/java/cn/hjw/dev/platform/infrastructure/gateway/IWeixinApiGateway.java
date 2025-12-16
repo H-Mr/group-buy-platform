@@ -4,11 +4,9 @@ import cn.hjw.dev.platform.infrastructure.gateway.dto.WeixinQrCodeRequestDTO;
 import cn.hjw.dev.platform.infrastructure.gateway.dto.WeixinQrCodeResponseDTO;
 import cn.hjw.dev.platform.infrastructure.gateway.dto.WeixinTemplateMessageDTO;
 import cn.hjw.dev.platform.infrastructure.gateway.dto.WeixinTokenResponseDTO;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
-import retrofit2.http.Body;
-import retrofit2.http.GET;
-import retrofit2.http.POST;
-import retrofit2.http.Query;
+import retrofit2.http.*;
 
 /**
  * @author Fuzhengwei hjw.dev.cn @小傅哥
@@ -54,5 +52,17 @@ public interface IWeixinApiGateway {
      */
     @POST("cgi-bin/message/template/send")
     Call<Void> sendMessage(@Query("access_token") String accessToken, @Body WeixinTemplateMessageDTO weixinTemplateMessageDTO);
+
+
+    /**
+     * 获取微信公众号二维码图片
+     * 接口地址：https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=TICKET
+     *
+     * @param url    微信图片服务地址 (https://mp.weixin.qq.com/cgi-bin/showqrcode)
+     * @param ticket 获取的凭证
+     * @return 图片流 (ResponseBody)
+     */
+    @GET
+    Call<ResponseBody> fetchWeixinQrCode(@Url String url, @Query("ticket") String ticket);
 
 }

@@ -29,20 +29,19 @@ public class LoginController implements IAuthService {
 
 
     /**
-     * 获取登录二维码 ticket
-     * http://xfg-studio.natapp1.cc/api/v1/login/weixin_qrcode_ticket
+     * 获取登录二维码
      * @return
      */
-    @RequestMapping(value = "weixin_qrcode_ticket", method = RequestMethod.GET)
+    @RequestMapping(value = "weixin_qrcode", method = RequestMethod.GET)
     @Override
     public Response<String> weixinQrCodeTicket() {
         try {
-            String qrCodeTicket = loginService.createQrCodeTicket();
-            log.info("生成微信扫码登录 ticket:{}", qrCodeTicket);
+            String image = loginService.generateLoginQrCodeImage();
+            log.info("生成微信二维码 image:{}", image);
             return Response.<String>builder()
                     .code(ResponseCode.SUCCESS.getCode())
                     .info(ResponseCode.SUCCESS.getInfo())
-                    .data(qrCodeTicket)
+                    .data(image)
                     .build();
         } catch (Exception e) {
             log.error("生成微信扫码登录 ticket 失败", e);
@@ -54,8 +53,7 @@ public class LoginController implements IAuthService {
     }
 
     /**
-     * 运行登录状态检查
-     * http://xfg-studio.natapp1.cc/api/v1/login/check_login
+     * 轮询扫码结果
      */
     @RequestMapping(value = "check_login", method = RequestMethod.GET)
     @Override

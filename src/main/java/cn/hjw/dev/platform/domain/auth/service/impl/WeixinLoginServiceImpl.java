@@ -20,11 +20,6 @@ public class WeixinLoginServiceImpl implements ILoginService {
     private IAuthRepository authRepository; // 认证仓储
 
     @Override
-    public String createQrCodeTicket() throws Exception {
-        return loginPort.createQrCodeTicket();
-    }
-
-    @Override
     public String checkLogin(String ticket) throws IOException {
         boolean isScan = loginPort.checkLoginState(ticket);// 根据 ticket 获取登录状态
         String token = null;
@@ -40,9 +35,11 @@ public class WeixinLoginServiceImpl implements ILoginService {
         loginPort.saveLoginState(ticket, openid);
     }
 
+
     @Override
-    public String getToken(String userId) {
-        return authRepository.getToken(userId);
+    public String generateLoginQrCodeImage() throws Exception {
+        String qrCodeTicket = loginPort.createQrCodeTicket();
+        return loginPort.generateLoginQrCodeImage(qrCodeTicket);
     }
 }
 

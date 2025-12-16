@@ -8,7 +8,10 @@ import cn.hjw.dev.platform.infrastructure.gateway.dto.WeixinQrCodeRequestDTO;
 import cn.hjw.dev.platform.infrastructure.gateway.dto.WeixinQrCodeResponseDTO;
 import cn.hjw.dev.platform.infrastructure.gateway.dto.WeixinTokenResponseDTO;
 import cn.hjw.dev.platform.infrastructure.redis.IRedisService;
+import cn.hjw.dev.platform.types.enums.ResponseCode;
+import cn.hjw.dev.platform.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.ResponseBody;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,6 +19,7 @@ import retrofit2.Call;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.util.Base64;
 
 @Slf4j
 @Service
@@ -92,6 +96,27 @@ public class LoginPortImpl implements ILoginPort {
     @Override
     public boolean checkLoginState(String ticket) throws IOException {
         return StringUtils.isNotBlank(redisService.getValue(IWeixinApiGateway.WEIXIN_QRCODE_TICKET_PREFIX+ticket));
+    }
+
+    @Override
+    public String generateLoginQrCodeImage(String ticket) throws Exception {
+        String base64Str = null;
+       try {
+           retrofit2.Call<ResponseBody> imageCall =  weixinApiGateway.fetchWeixinQrCode("https://mp.weixin.qq.com/cgi-bin/showqrcode", ticket);
+           // 同步执行请求
+           retrofit2.Response<ResponseBody> execute = imageCall.execute();
+           if (!execute.isSuccessful() || execute.body() == null) {
+               throw new AppException(ResponseCode.UN_ERROR.getCode(),"获取微信二维码图片失败");
+           }
+           // 将图片流转换为 Base64 字符串
+           byte[] imageBytes = execute.body().bytes();
+           String base64Image = Base64.getEncoder().encodeToString(imageBytes);
+           base64Str = "data:image/jpeg;base64," + base64Image;
+       } catch (Exception e) {
+              log.error("生成微信登录二维码图片失败：{}", e.getMessage(), e);
+              throw new AppException(ResponseCode.UN_ERROR.getCode(),"生成微信登录二维码图片失败");
+       }
+        return base64Str;
     }
 
 

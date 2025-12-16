@@ -27,4 +27,14 @@ public interface ILoginPort {
      */
     boolean checkLoginState(String ticket) throws IOException;
 
+
+    /**
+     * 生成登录二维码图片
+     * @return
+     * @throws Exception
+     */
+    String generateLoginQrCodeImage(String ticket) throws Exception;
+
+
+
 }
