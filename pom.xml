@@ -11,9 +11,9 @@
   </parent>
 
   <groupId>hjw.agent</groupId>
-  <artifactId>group-buy-mall</artifactId>
+  <artifactId>group-buy-platform</artifactId>
   <version>1.0</version>
-  <name>group-buy-mall</name>  <!-- 项目名称关联 artifactId -->
+  <name>group-buy-platform</name>  <!-- 项目名称关联 artifactId -->
 
   <repositories>
     <repository>
@@ -38,23 +38,12 @@
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-
+    <!-- http 接口框架 https://hjw.dev.cn/md/road-map/http.html -->
     <dependency>
       <groupId>com.squareup.okhttp3</groupId>
       <artifactId>okhttp-sse</artifactId>
       <version>3.14.9</version>
     </dependency>
-
     <dependency>
       <groupId>org.mybatis.spring.boot</groupId>
       <artifactId>mybatis-spring-boot-starter</artifactId>
@@ -62,10 +51,14 @@
     </dependency>
 
     <dependency>
-      <groupId>org.redisson</groupId>
-      <artifactId>redisson-spring-boot-starter</artifactId>
-      <version>3.44.0</version>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
+
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-test</artifactId>
+      </dependency>
 
     <dependency>
       <groupId>mysql</groupId>
@@ -83,26 +76,97 @@
       <version>3.9</version>
     </dependency>
     <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>32.1.3-jre</version>
+    </dependency>
+    <dependency>
+      <groupId>dom4j</groupId>
+      <artifactId>dom4j</artifactId>
+      <version>1.6.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.thoughtworks.xstream</groupId>
+      <artifactId>xstream</artifactId>
+      <version>1.4.10</version>
+    </dependency>
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt</artifactId>
+      <version>0.9.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.auth0</groupId>
+      <artifactId>java-jwt</artifactId>
+      <version>4.4.0</version>
+    </dependency>
+
+    <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
       <version>1.15</version>
     </dependency>
 
     <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>32.1.3-jre</version>
+      <groupId>org.redisson</groupId>
+      <artifactId>redisson-spring-boot-starter</artifactId>
+      <version>3.44.0</version>
+    </dependency>
+
+    <!-- JWT -->
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-api</artifactId>
+      <version>0.11.5</version>
+    </dependency>
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-impl</artifactId>
+      <version>0.11.5</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-jackson</artifactId>
+      <version>0.11.5</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.squareup.retrofit2</groupId>
+      <artifactId>retrofit</artifactId>
+      <version>2.9.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.squareup.retrofit2</groupId>
+      <artifactId>converter-jackson</artifactId>
+      <version>2.9.0</version>
+    </dependency>
+
+    <!-- 支付宝沙箱支付对接文档：https://opendocs.alipay.com/common/02kkv7 -->
+    <dependency>
+      <groupId>com.alipay.sdk</groupId>
+      <artifactId>alipay-sdk-java</artifactId>
+      <version>4.38.157.ALL</version>
+    </dependency>
+
+<!--    DAGFlow-->
+    <dependency>
+      <groupId>hjw.dev</groupId>
+      <artifactId>DAGFlow</artifactId>
+      <version>v0.0.1</version>
     </dependency>
 
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.30</version>
-      <scope>provided</scope>
-      <optional>true</optional>
     </dependency>
 
-
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+    </dependency>
   </dependencies>
 
   <build>

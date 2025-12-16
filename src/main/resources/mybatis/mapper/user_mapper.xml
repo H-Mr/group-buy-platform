@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.hjw.dev.platform.infrastructure.dao.IUserDao">
+
+    <resultMap id="dataMap" type="cn.hjw.dev.platform.infrastructure.dao.po.User">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="openid" property="openid"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+<!--
+MyBatis 中 <insert>、<update>（以及 <delete>）标签对应的 SQL 执行后，底层必然会返回 “受影响的行数”（JDBC 原生逻辑）；但你是否能在代码中拿到这个数值，取决于 Mapper 接口方法的返回值声明—— 而非 XML 标签是否显式配置 “返回值”。
+简单来说：
+若 Mapper 接口方法声明为 void：MyBatis 会执行 SQL，但丢弃受影响行数，调用方拿不到；
+若 Mapper 接口方法声明为 int/Integer：MyBatis 会将受影响行数返回给调用方（即使 XML 里没写任何返回值配置）。
+
+MyBatis 执行 insert/update/delete 时，最终会调用 JDBC 的 PreparedStatement.executeUpdate() 方法，这个方法的原生返回值就是 int 类型的受影响行数：
+insert：返回成功插入的行数（单条插入通常是 1，批量插入是总条数）；
+update：返回成功更新的行数（匹配到记录则≥1，没匹配到则 0）；
+delete：返回成功删除的行数。
+MyBatis 只是对 JDBC 做了封装，这个核心逻辑不会改变。
+-->
+
+    <select id="queryUserByOpenId" parameterType="java.lang.String" resultMap="dataMap">
+        select user_id, openid
+        from user
+        where openid = #{openid}
+        limit 1
+    </select>
+
+    <insert id="insert" parameterType="cn.hjw.dev.platform.infrastructure.dao.po.User">
+        insert into user(
+            user_id, openid, create_time, update_time)
+        values(
+           #{userId}, #{openid}, now(), now())
+    </insert>
+</mapper>
