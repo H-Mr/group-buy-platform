@@ -113,9 +113,9 @@ alipay:
 logging:
   level:
     root: INFO
-    com.your.package: DEBUG  # 你的业务代码包，按需调整
+    cn.hjw.dev: DEBUG  # 开发环境日志级别设为 DEBUG，方便调试
   file:
-    path: /logs
+    path: logs
 
 
 # Spring Boot Actuator 配置（健康检查核心）

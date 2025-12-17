@@ -41,3 +41,5 @@ build/
 .idea/
 data/
 *.log
+
+log/
