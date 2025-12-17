@@ -13,6 +13,7 @@
   <groupId>hjw.agent</groupId>
   <artifactId>group-buy-platform</artifactId>
   <version>1.0</version>
+  <packaging>jar</packaging>
   <name>group-buy-platform</name>  <!-- 项目名称关联 artifactId -->
 
   <repositories>
@@ -35,9 +36,21 @@
     <maven.compiler.source>8</maven.compiler.source>
     <maven.compiler.target>8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <java-home>D:\JAVA\jdk8u462-b08\jdk8u462-b08</java-home>
   </properties>
 
   <dependencies>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+
+    <!-- MySQL 健康检查（JDBC 方式） -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-jdbc</artifactId>
+    </dependency>
 
     <!-- http 接口框架 https://hjw.dev.cn/md/road-map/http.html -->
     <dependency>
@@ -172,29 +185,106 @@
 
   <build>
     <plugins>
+
       <plugin>
+        <!--    maven-compiler-plugin：Java 代码编译的 “核心引擎”（绝对必须）
+        负责将项目中的 .java 源码文件编译成 JVM 能识别的 .class 字节码文件，是 Maven 构建流程的第一步（没有编译，后续打包 / 运行都是空谈）。
+
+具体功能配置说明：
+<source>8</source>：指定源码兼容 JDK 8 语法（比如 Lambda、Stream 等 JDK 8 特性不会编译报错）；
+<target>8</target>：指定编译后的字节码适配 JDK 8 运行环境（避免高版本字节码在 JDK 8 上运行报错）；
+<encoding>${project.build.sourceEncoding}</encoding>：统一源码编译编码（通常对应 UTF-8），避免中文注释 / 字符串编译后乱码。
+        -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.0</version>
+        <version>3.8.1</version>
         <configuration>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
+          <source>8</source>
+          <target>8</target>
           <encoding>${project.build.sourceEncoding}</encoding>
+          <!-- 可选但推荐：强制使用JAVA_HOME指定的JDK编译，避免环境冲突 -->
+          <fork>true</fork>
+          <executable>${java-home}/bin/javac</executable>
         </configuration>
       </plugin>
+<!--      -->
       <plugin>
+<!--
+        maven-resources-plugin：项目资源文件的 “搬运工”（绝对必须）
+处理项目中的非源码文件（资源文件），将这些文件拷贝到编译后的 target/classes 目录（classpath 根目录），确保项目运行时能加载到配置 / 静态资源。
+哪些是 “资源文件”？
+Spring Boot 配置文件：application.yml、logback-spring.xml；
+静态资源：src/main/resources/static 下的图片、JS/CSS；
+自定义配置：比如 jdbc.properties、alipay-config.properties；
+国际化文件：messages_zh_CN.properties 等。
+
+如果没有这个插件：src/main/resources 下的配置文件不会被拷贝到 target/classes，
+Spring Boot 启动时会因找不到 application.yml 直接报错，日志配置、数据库连接信息等也无法加载；
+-->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>2.5</version>
+        <version>3.3.1</version>
         <configuration>
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
       <plugin>
+<!--
+versions-maven-plugin：版本管理的 “效率工具”（可选但推荐）
+辅助管理项目中所有版本相关的内容（项目自身版本、依赖版本、插件版本），是开发 / 维护阶段的效率插件，不影响核心构建流程。
+具体实用功能
+检查依赖 / 插件的新版本：执行 mvn versions:display-dependency-updates，一键查看哪些依赖（比如 Spring Boot、MySQL 驱动）有更新，避免使用过老版本导致安全漏洞；
+批量升级版本：执行 mvn versions:use-latest-releases，自动将所有依赖升级到最新稳定版；
+快速修改项目版本：执行 mvn versions:set -DnewVersion=1.0.1，一键把项目版本从 1.0.0 改成 1.0.1（无需手动改 pom.xml）；
+检查版本冲突：识别依赖树中重复 / 冲突的版本（比如多个依赖引入不同版本的 guava）。
+为什么建议加（非必须但有用）
+你的项目是团购平台（生产级），依赖版本管理至关重要：
+避免依赖版本过老导致的安全漏洞（比如旧版 Redis 客户端存在命令注入风险）；
+批量管理版本号，减少手动修改 pom.xml 的出错概率；
+-->
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>2.7</version>
+        <version>2.16.0</version>
       </plugin>
+
+
+<!--
+1. 将普通 Jar 打包为可执行 Fat Jar（包含所有依赖，能 java -jar 运行）
+2. 提供 repackage（重打包）、run（直接运行项目）、build-info 等功能
+这是 Maven 插件的执行规则配置，专门控制 spring-boot-maven-plugin 该 “在什么时候做什么事”，拆解如下：
+1. 先理解 Maven 的 “生命周期”
+Maven 打包有固定的执行阶段（生命周期）：clean → compile（编译） → test（测试） → package（打包） → install（安装到本地仓库）。插件需要绑定到某个生命周期阶段才能自动执行，否则只会 “存在” 但不会生效。
+2. <executions>：定义插件的 “执行规则”
+<execution>：一个执行单元（可配置多个，对应不同阶段 / 目标）；
+<goals>：该执行单元要触发的插件 “目标（goal）”，这里是 repackage。
+3. repackage：Spring Boot 打包的核心目标
+它是 spring-boot-maven-plugin 最核心的功能，作用是：
+第一步：Maven 先执行默认的 package 阶段，生成一个「普通瘦 Jar」（仅包含你的项目代码，没有依赖包，无法直接 java -jar 运行）；
+第二步：repackage 目标触发，把这个「瘦 Jar」重打包为「可执行胖 Jar」（Fat Jar）—— 内置所有依赖、Spring Boot 启动器、依赖加载逻辑；
+最终产物：target 目录下会生成两个 Jar：
+original-xxx.jar：Maven 默认打包的瘦 Jar（无用）；
+xxx.jar：Spring Boot 重打包的胖 Jar（可直接 java -jar xxx.jar 运行，部署用这个）。
+4. 为什么要显式配置？
+repackage 虽然默认绑定到 package 阶段，但显式配置 <executions> 是更稳妥的做法：
+避免不同 Spring Boot 插件版本的 “绑定失效” 问题；
+明确告诉 Maven：打包阶段必须执行 repackage，确保生成可执行 Jar。
+三、关键注意事项（必看）
+版本一致性：spring-boot-maven-plugin 的版本必须和项目中 spring-boot-starter-parent 的版本完全一致！
+-->
+
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <version>2.7.12</version> <!-- 必须和Spring Boot父版本一致！ -->
+        <executions>
+          <execution>
+            <goals>
+              <goal>repackage</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
   </build>
 

@@ -6,6 +6,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufOutputStream;
+import org.apache.commons.lang3.ObjectUtils;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.codec.BaseCodec;
@@ -36,7 +37,6 @@ public class RedisClientConfig {
 
         config.useSingleServer()
                 .setAddress("redis://" + properties.getHost() + ":" + properties.getPort()) // redis://host:port
-//              .setPassword(properties.getPassword())
                 .setConnectionPoolSize(properties.getPoolSize()) // 连接池大小
                 .setConnectionMinimumIdleSize(properties.getMinIdleSize()) // 最小空闲连接数
                 .setIdleConnectionTimeout(properties.getIdleTimeout()) // 最大空闲时间
@@ -46,6 +46,9 @@ public class RedisClientConfig {
                 .setPingConnectionInterval(properties.getPingInterval()) // 连接检查间隔时间
                 .setKeepAlive(properties.isKeepAlive()) // 是否保持长连接
         ;
+        if(ObjectUtils.isNotEmpty(properties.getPassword())) {
+            config.useSingleServer().setPassword(properties.getPassword());
+        }
 
         return Redisson.create(config);
     }

@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8080 # 容器内部端口
 
 # 线程池配置
 thread:
@@ -38,8 +38,8 @@ app:
     cross-origin: '*'
     # SC 渠道配置 - 拼团对接渠道值、回调通知
     group-buy-market:
-      api-url: http://127.0.0.1:8091
-      notify-url: http://127.0.0.1:8080/api/v1/alipay/group_buy_notify
+      api-url: http://127.0.0.1:8080 # 未启用，扩展使用
+      notify-url: http://111.228.51.8:8080/api/v1/alipay/group_buy_notify
       source: s01
       chanel: c01
 
@@ -48,8 +48,8 @@ app:
 spring:
   datasource:
     username: root
-    password: 123456
-    url: jdbc:mysql://111.228.51.8:13306/group_buy_market?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&useSSL=true
+    password: group_buy_mysql_admin
+    url: jdbc:mysql://mysql:3306/group_buy_market?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&useSSL=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       pool-name: Retail_HikariCP
@@ -73,9 +73,10 @@ mybatis:
 redis:
   sdk:
     config:
-      host: 111.228.51.8
-      port: 16379
+      host: redis
+      port: 6379
       pool-size: 10
+      password: group_buy_redis_admin
       min-idle-size: 5
       idle-timeout: 30000
       connect-timeout: 5000
@@ -95,8 +96,9 @@ weixin:
 
 
 jwt:
-  secret: abc123456
-  expire: 7200 # Token有效期（秒）
+  secret: afae98e1bfbd25bbb0549ee4e1e0448003c9fb714d84d45d1b7e9f0e99e8d056
+  expire: 7200 # Token有效期（秒）(2小时)
+
 
 # 支付宝支付 - 沙箱 https://opendocs.alipay.com/common/02kkv7
 alipay:
@@ -114,4 +116,24 @@ alipay:
 logging:
   level:
     root: info
+    cn.hjw.dev: info
+  file:
+    path: logs
   config: classpath:logback-spring.xml
+
+
+# Spring Boot Actuator 配置（健康检查核心）
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health  # 暴露健康检查端点（生产环境仅暴露必要端点，避免安全风险）
+      base-path: /actuator  # 端点根路径（默认就是/actuator，可省略）
+  endpoint:
+    health:
+      show-details: always  # 显示健康检查详情（方便调试，生产可改为when_authorized）
+  health:
+    redis:
+      enabled: true  # 检查Redis连接状态
+    db:
+      enabled: true  # 检查MySQL数据库连接状态

@@ -100,7 +100,6 @@ jwt:
 
 # 支付宝支付 - 沙箱 https://opendocs.alipay.com/common/02kkv7
 alipay:
-  enabled: true
   app_id: 9021000157621491
   alipay_public_key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAo4OqPqOlkFX9buHWXdYlrtq3jVPl4Bsk3kpinDihzmjXTnF2rWBOUxmDWQ/caSt76+XqSuEp9ZQHP03Qwog1dq7Kjes46BtlfCyDA4HeMtjtF8QGCZjVCGzFH+mKhygRF+YWSKqakuD56Lkm3mtz8UVn8U1ZgAw5u5MXkqv6OS6AG1YDRBT/kZTHIYwjgR8d1WufJYS9V/SPSQaXTvlSd3eyieI4De+giNcX5e9axY7VBQvjzY1po0MuzHxvOBsHnEV4bTtxORu0CpHX9YufsUYTFjU6cxqNbLr02rpu6JmfX7XOuGALGIt+TvtmHYhL0zGbryjJMx+dcUsLqpqGtQIDAQAB
   merchant_private_key: MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCorrmJGT69v+pUFHWwYC6PvX4+sxPW+BgENGk2msoaJMzpYDerLC3x2L/Zk9jMur2G1ayZGzq2tMQQ25uyYjzQuErYbCpKKPVPWZ0bAqoala9BiYeE6UwdgGdBXdprEVd6CCtduFkOdi5CWyHqG6vzaJGuIVP1tTBXJYogju4Uw7afVyqmFAO/i2jOfP3FLZeKh4RW/+8vIvSv2Auc5WarWvE/7RkzAXdZskCmXGZwwmzWvVvLZSYsWskJNLJUWmQ0nm4KTMKRSVCJrtKO9jPrgsRrnVpRtYNBG1LJJ4jig3uYWzjSlnGXYwDWPpQTD+2JVuRAijabjMwoJfL1s5uLAgMBAAECggEAam8VErSjKgdWTAc82zVVK81dQyKrehDA1qZbXOD+dNCTmw3jElamBtvE8fyf505NGC7q4RCVU4Nr01c+PqhNx0UBtN1LMc/2OUNKJijgPDYGh0vH/s1WAadrf4tArh4bHBzbgB850i4vsh7en2Emdkec5EqTN45EGjjNlw2Ym/B7Gal/Wyev2Qkt7fWHK4eblFNWeg1W3u1kwdtv5l3rhG2KoWMl+FKZJ66O1wqgcc5rURmErkcDweELBVJqpxvbwLleGMuirQqrVb6nr5AhC5G05trFKLox9KD9LMlleEwy+v7Kz19G1+Se5pZ1a+D+HrWxVIBTybZUoVU8JiXZQQKBgQDdoD8bdzmiJ7dWoY3dP1hKh85ANjIyKTeVxeaG+pj5bo4T7bEqmPWiWx7Y85Bj/GF4RQwjzXF6W1cEoUO5PzVfkLVR4tpfKQflRIB/30fAo9IT7nplB6wbXN1E7C3uvJqYlxLY9oZi5D0luvwVfx0jbXIc1UYiXJMCs0HeFiBFHQKBgQDC2FYPQNZAgVZUsb3RIENNuquHsqJZDZ57yspVBz7+VY6EYQ5fQH/pbz/QdfhJ/gTBdhOKpvYV2JysWLQBsNBo852jvjF83AOoYf4ma8hMk8tuODLIGY4FGC1Nne/uO5d+xPL0pauUhjTR+U0eIuPrV7887kCC7I0jGc0RSVnKxwKBgQC5D0oi4Rda89b/m78d8/sBoQz0SUz43bnwcmPgafi6rzosIdpCO59Aht3nQtpa4y9wghd0/eO3y/WJhC9MzB8BQZBmZAr8UwKoyt6R6Bu+HA0bX5MMMa/g2VZaauyf4RUmPWAbkx78DKGSk+RS/uWR453ZvazmnG6VXqGtlMQ1cQKBgQCNZHwfGYfgy3qgf1MlnOn6UAoFsQXK5e0qHCDzzwxReDixq9TIHoA0H70JQ3JoD2PYGB1aMorFk6kuEDigOXUjlBXDK1OyLd6hpGrP6ssxdtbbJwEC4DiFTeQiPQhNswTew4EjM83tO+68qNLjmaIXuFdYmfRKjeplnGWJs9brJQKBgANs5QLoA0L6jTuvYKoT2jqR55FMpksrnQnr/f68N9z76NTV+DjIXk26LYOTcMVfnJsUUpY/5Oii0iNbnpgYd8oQZTgdPZBIyqeGaMsANudqPBuCnXpuVQwHvCsMEJKB67ZDJRW9Bg60lAf2dx2BUnq9hGoiIbQDTvySIE6ncT+O
@@ -110,8 +109,27 @@ alipay:
 
 
 
-# 日志
+# 日志配置（匹配 Logback 中的 LOG_PATH 变量）
 logging:
   level:
-    root: info
-  config: classpath:logback-spring.xml
+    root: INFO
+    com.your.package: DEBUG  # 你的业务代码包，按需调整
+  file:
+    path: /logs
+
+
+# Spring Boot Actuator 配置（健康检查核心）
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health  # 暴露健康检查端点（生产环境仅暴露必要端点，避免安全风险）
+      base-path: /actuator  # 端点根路径（默认就是/actuator，可省略）
+  endpoint:
+    health:
+      show-details: always  # 显示健康检查详情（方便调试，生产可改为when_authorized）
+  health:
+    redis:
+      enabled: true  # 检查Redis连接状态
+    db:
+      enabled: true  # 检查MySQL数据库连接状态
