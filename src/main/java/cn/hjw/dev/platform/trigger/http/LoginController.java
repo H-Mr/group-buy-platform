@@ -1,17 +1,17 @@
 package cn.hjw.dev.platform.trigger.http;
 
 import cn.hjw.dev.platform.api.IAuthService;
+import cn.hjw.dev.platform.api.dto.AuthTokenResponseDTO;
 import cn.hjw.dev.platform.api.response.Response;
 import cn.hjw.dev.platform.domain.auth.service.ILoginService;
 import cn.hjw.dev.platform.types.enums.ResponseCode;
+import cn.hjw.dev.platform.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 
 /**
  * 登录控制器
@@ -54,34 +54,37 @@ public class LoginController implements IAuthService {
 
     /**
      * 轮询扫码结果
+     * @param ticket 登录票据
      */
     @RequestMapping(value = "check_login", method = RequestMethod.GET)
     @Override
-    public Response<String> checkLogin(String ticket) {
-        try {
-            String token = loginService.checkLogin(ticket);
-            // if openidToken is not blank, login successful。构造jwt返回
-            log.info("扫码检测登录结果 ticket:{} token:{}", ticket, token);
-            if (StringUtils.isNotBlank(token)) {
-                return Response.<String>builder()
+    public Response<AuthTokenResponseDTO> checkLogin(String ticket) throws IOException {
+
+            AuthTokenResponseDTO tokenPair = loginService.checkLogin(ticket);
+            log.info("扫码检测登录结果 ticket:{} res:{}", ticket, tokenPair);
+            if (ObjectUtils.isNotEmpty(tokenPair)) {
+                return Response.<AuthTokenResponseDTO>builder()
                         .code(ResponseCode.SUCCESS.getCode())
                         .info(ResponseCode.SUCCESS.getInfo())
-                        .data(token)
-                        .build();
-            } else {
-
-                return Response.<String>builder()
-                        .code(ResponseCode.NO_LOGIN.getCode())
-                        .info(ResponseCode.NO_LOGIN.getInfo())
+                        .data(tokenPair)
                         .build();
             }
-        } catch (Exception e) {
-            log.error("扫码检测登录结果失败 ticket:{}", ticket, e);
-            return Response.<String>builder()
-                    .code(ResponseCode.UN_ERROR.getCode())
-                    .info(ResponseCode.UN_ERROR.getInfo())
-                    .build();
-        }
+            throw  new AppException(ResponseCode.NO_LOGIN.getCode(), "未扫码登录");
     }
 
+    /**
+     * 刷新 Token 接口
+     * @param refreshToken 刷新令牌
+     * 前端拦截器发现 401 后，携带 refreshToken 调用此接口
+     */
+    @PostMapping("refresh_token")
+    public Response<AuthTokenResponseDTO> refreshToken(@RequestParam String refreshToken) {
+
+            AuthTokenResponseDTO tokenInfo = loginService.refreshAccessToken(refreshToken);
+            return Response.<AuthTokenResponseDTO>builder()
+                    .code(ResponseCode.SUCCESS.getCode())
+                    .info(ResponseCode.SUCCESS.getInfo())
+                    .data(tokenInfo)
+                    .build();
+    }
 }

@@ -95,8 +95,8 @@ weixin:
 
 
 jwt:
-  secret: abc123456
-  expire: 7200 # Token有效期（秒）
+  secret: afae98e1bfbd25bbb0549ee4e1e0448003c9fb714d84d45d1b7e9f0e99e8d056
+  expire: 7200 # Token有效期（秒）(2小时)
 
 # 支付宝支付 - 沙箱 https://opendocs.alipay.com/common/02kkv7
 alipay:

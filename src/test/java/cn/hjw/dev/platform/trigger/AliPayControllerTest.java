@@ -25,10 +25,8 @@ public class AliPayControllerTest {
         // 1. 商品下单，根据商品ID创建支付单
         log.info("商品下单，根据商品ID创建支付单开始 userId:{} productId:{}", userId, productId);
         CreatePayRequestDTO payRequestDTO = CreatePayRequestDTO.builder()
-                .userId(userId)
                 .activityId(activityId)
                 .productId(productId)
-                .marketType(marketType)
                 .build();
         String payUrl = payService.createPayOrder(payRequestDTO).getData();
         log.info("商品下单，根据商品ID创建支付单完成 payUrl:{}", payUrl);

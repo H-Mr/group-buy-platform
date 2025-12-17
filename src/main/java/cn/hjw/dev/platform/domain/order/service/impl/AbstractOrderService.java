@@ -85,7 +85,9 @@ public abstract class AbstractOrderService implements IOrderService {
 
         // 1. 调用商品服务，查询商品信息 mock(从sku表获取指定的商品信息)
         ProductEntity productEntity = port.queryProductByProductId(shopCartEntity.getProductId());
-
+        if (ObjectUtils.isEmpty(productEntity)) {
+            throw new Exception("创建订单-失败，商品不存在。productId: " + shopCartEntity.getProductId());
+        }
         // 2. 创建订单基础数据
         OrderEntity orderEntity = CreateOrderAggregate.buildOrderEntity(productEntity, shopCartEntity);
 
@@ -149,6 +151,8 @@ public abstract class AbstractOrderService implements IOrderService {
                 .teamId(shopCartEntity.getTeamId())
                 .orderId(orderEntity.getOrderId())
                 .productId(shopCartEntity.getProductId())
+                .source(shopCartEntity.getSource())
+                .channel(shopCartEntity.getChannel())
                 .build();
         GroupMarketProductPriceVO groupMarketProductPriceVO = this.port.lockMarketPayOrder(lockMarketPayOrderVO);
 

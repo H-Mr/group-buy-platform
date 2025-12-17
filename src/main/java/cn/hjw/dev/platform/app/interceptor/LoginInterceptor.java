@@ -1,5 +1,6 @@
 package cn.hjw.dev.platform.app.interceptor;
 
+import cn.hjw.dev.platform.infrastructure.dcc.DynamicConfigCenter;
 import cn.hjw.dev.platform.types.common.Constants;
 import cn.hjw.dev.platform.types.enums.ResponseCode;
 import cn.hjw.dev.platform.types.exception.AppException;
@@ -17,10 +18,12 @@ import javax.servlet.http.HttpServletResponse;
 public class LoginInterceptor implements HandlerInterceptor {
 
     private final JwtUtils jwtUtils;
+    // 注入 DCC，用于动态获取体验 Token 配置
+    private final DynamicConfigCenter dynamicConfigCenter;
 
-    // 构造注入，方便从 Config 传入
-    public LoginInterceptor(JwtUtils jwtUtils) {
+    public LoginInterceptor(JwtUtils jwtUtils, DynamicConfigCenter dynamicConfigCenter) {
         this.jwtUtils = jwtUtils;
+        this.dynamicConfigCenter = dynamicConfigCenter;
     }
 
     @Override
@@ -39,24 +42,32 @@ public class LoginInterceptor implements HandlerInterceptor {
             throw new AppException(ResponseCode.NO_LOGIN.getCode(), ResponseCode.NO_LOGIN.getInfo());
         }
 
+        // 1. 判断开关是否开启
+        if (dynamicConfigCenter.isDemoTokenOpen()) {
+            // 2. 匹配 Token 字符串
+            if (token.equals(dynamicConfigCenter.getDemoTokenSecret())) {
+                String demoUserId = dynamicConfigCenter.getDemoUserId();
+                log.info("演示模式：使用体验Token登录，用户ID: {}", demoUserId);
+                // 3. 直接设置上下文，跳过 JWT 解析
+                UserContext.setUserId(demoUserId);
+                return true;
+            }
+        }
+        // ================= 核心修改结束 =================
+        // ================= 核心修改结束 =================
+
         try {
-            // 2. 解析 Token
             Claims claims = jwtUtils.parseToken(token);
-
             String userId = (String) claims.get("userId");
-
             if (StringUtils.isBlank(userId)) {
                 throw new AppException(ResponseCode.NO_LOGIN.getCode(), "Token无效：缺少用户信息");
             }
-
-            // 3. 将 userId 放入上下文，供后续 Controller 使用
             UserContext.setUserId(userId);
-
-            return true; // 放行
-
+            return true;
         } catch (Exception e) {
-            log.warn("拦截器鉴权失败，Token: {}", token, e);
-            throw new AppException(ResponseCode.NO_LOGIN.getCode(), "登录已过期，请重新扫码登录");
+            // 注意：前端遇到此报错(code: 401/NO_LOGIN)，应该触发使用 refreshToken 换取新 token 的流程
+            log.warn("拦截器鉴权失败，Token: {}", token);
+            throw new AppException(ResponseCode.NO_LOGIN.getCode(), "登录已过期");
         }
     }
 

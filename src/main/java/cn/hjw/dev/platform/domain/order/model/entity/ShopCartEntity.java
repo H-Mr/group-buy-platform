@@ -27,4 +27,8 @@ public class ShopCartEntity {
     // 营销类型，无营销，拼团营销
     private MarketTypeVO marketTypeVO;
 
+    private String source; // 商品来源
+
+    private String channel; // 商品渠道
+
 }

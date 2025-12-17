@@ -28,7 +28,7 @@ public interface IRedisService {
      *
      * @param key     键
      * @param value   值
-     * @param expired 过期时间
+     * @param expired 过期时间(毫秒)
      */
     <T> void setValue(String key, T value, long expired);
 

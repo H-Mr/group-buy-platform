@@ -10,6 +10,8 @@ import cn.hjw.dev.platform.domain.order.adapter.port.IOrderPort;
 import cn.hjw.dev.platform.domain.order.model.entity.ProductEntity;
 import cn.hjw.dev.platform.domain.order.model.valobj.GroupMarketProductPriceVO;
 import cn.hjw.dev.platform.domain.order.model.valobj.LockMarketPayOrderVO;
+import cn.hjw.dev.platform.infrastructure.dao.ISkuDao;
+import cn.hjw.dev.platform.infrastructure.dao.po.Sku;
 import cn.hjw.dev.platform.infrastructure.gateway.AlipayRequestGateway;
 import cn.hjw.dev.platform.infrastructure.gateway.ProductGateway;
 import cn.hjw.dev.platform.infrastructure.gateway.dto.ProductDTO;
@@ -31,10 +33,6 @@ import java.time.LocalDateTime;
 @Component
 public class OrderPortImpl implements IOrderPort {
 
-    @Value("${app.config.group-buy-market.source}")
-    private String source;
-    @Value("${app.config.group-buy-market.chanel}")
-    private String chanel;
     @Value("${app.config.group-buy-market.notify-url}")
     private String notifyUrl;
 
@@ -58,6 +56,8 @@ public class OrderPortImpl implements IOrderPort {
     @Resource
     private IMarketTradeService marketTradeService;
 
+
+
     /**
      * mock 商品服务，查询固定的SKU商品信息
      * @param productId
@@ -65,6 +65,7 @@ public class OrderPortImpl implements IOrderPort {
      */
     @Override
     public ProductEntity queryProductByProductId(String productId) {
+
         ProductDTO productDTO = productGateway.queryProductByProductId(productId);
         return ProductEntity.builder()
                 .productId(productDTO.getProductId())
@@ -88,9 +89,10 @@ public class OrderPortImpl implements IOrderPort {
                 .goodsId(lockMarketPayOrderVO.getProductId())
                 .teamId(lockMarketPayOrderVO.getTeamId())
                 .outTradeNo(lockMarketPayOrderVO.getOrderId())
-                .channel(chanel)
-                .source(source)
+                .channel(lockMarketPayOrderVO.getChannel())
+                .source(lockMarketPayOrderVO.getSource())
                 .build();
+
         requestDTO.setNotifyUrl(notifyUrl); // 设置成团回调地址
         Response<LockMarketPayOrderResponseDTO> lockedMarketResponse = marketTradeService.lockMarketPayOrder(requestDTO);
         if (ObjectUtils.isEmpty(lockedMarketResponse))
@@ -112,8 +114,8 @@ public class OrderPortImpl implements IOrderPort {
     @Override
     public void settlementMarketPayOrder(String userId, String orderId, LocalDateTime tradeTime) {
         SettlementMarketPayOrderRequestDTO requestDTO = new SettlementMarketPayOrderRequestDTO();
-        requestDTO.setSource(source);
-        requestDTO.setChannel(chanel);
+        requestDTO.setSource("source");
+        requestDTO.setChannel("chanel");
         requestDTO.setUserId(userId);
         requestDTO.setOutTradeNo(orderId);
         requestDTO.setOutTradeTime(tradeTime);

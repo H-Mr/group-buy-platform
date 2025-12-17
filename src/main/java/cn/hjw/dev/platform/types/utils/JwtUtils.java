@@ -38,12 +38,15 @@ public class JwtUtils {
                 .setSubject(userId)
                 .setIssuedAt(now)
                 .setExpiration(expireDate)
+                // 使用了 SignatureAlgorithm.HS256。HS256 (HMAC-SHA256) 算法规范要求密钥长度至少为 256 位（32 字节）。
+                // secret 长度：至少 32 个字符（建议 64 个字符以上），包含大小写字母、数字和特殊符号。
                 .signWith(SignatureAlgorithm.HS256, secret) // 必须确保 secret 长度足够
                 .compact();
     }
 
     // 解析 Token 方法（后续鉴权用）
-    public Claims parseToken(String token) {
+    public Claims parseToken(String tokenStr) {
+        String token = tokenStr.replace("Bearer ", "");
         return Jwts.parser()
                 .setSigningKey(secret)
                 .parseClaimsJws(token)

@@ -20,4 +20,6 @@ public class LockMarketPayOrderVO {
     private Long activityId;  // 活动ID
     private String productId; // 商品ID
     private String orderId; // 订单ID
+    private String source; // 来源
+    private String channel; // 渠道
 }

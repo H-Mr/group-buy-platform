@@ -1,5 +1,7 @@
 package cn.hjw.dev.platform.domain.auth.service;
 
+import cn.hjw.dev.platform.api.dto.AuthTokenResponseDTO;
+
 import java.io.IOException;
 
 public interface ILoginService {
@@ -9,7 +11,7 @@ public interface ILoginService {
      * @param ticket
      * @return 返回生成的token
      */
-    String checkLogin(String ticket) throws IOException;
+    AuthTokenResponseDTO checkLogin(String ticket) throws IOException;
 
     /**
      * 保存登录状态,微信回调事件触发
@@ -26,4 +28,6 @@ public interface ILoginService {
      * @throws Exception
      */
     String generateLoginQrCodeImage() throws Exception;
+
+    AuthTokenResponseDTO refreshAccessToken(String refreshToken);
 }

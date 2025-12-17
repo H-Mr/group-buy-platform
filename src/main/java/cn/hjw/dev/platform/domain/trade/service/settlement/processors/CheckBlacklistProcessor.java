@@ -23,11 +23,12 @@ public class CheckBlacklistProcessor implements DAGNodeProcessor<TradeSettlement
 
     @Override
     public SettlementDAGFactory.TradeSettlementNodeResult process(TradeSettlementRequest req, SettlementDAGFactory.TradeSettlementContext ctx) {
+        // 暂时停用黑名单校验功能
         log.info("DAG-Settlement: 结算渠道黑名单校验 source:{} channel:{}", req.getSource(), req.getChannel());
-        if (repository.isSCBlackIntercept(req.getSource(), req.getChannel())) {
-            log.warn("渠道黑名单拦截: {} {}", req.getSource(), req.getChannel());
-            throw new AppException(ResponseCode.E0105);
-        }
+//        if (repository.isSCBlackIntercept(req.getSource(), req.getChannel())) {
+//            log.warn("渠道黑名单拦截: {} {}", req.getSource(), req.getChannel());
+//            throw new AppException(ResponseCode.E0105);
+//        }
         return new SettlementDAGFactory.TradeSettlementNodeResult(SettlementDAGFactory.TradeSettlementNodeResult.TYPE_BLACKLIST, true);
     }
 }

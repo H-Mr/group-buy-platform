@@ -21,17 +21,17 @@ public class SwitchCheckProcessor implements DAGNodeProcessor<MarketProductEntit
     @Override
     public MarketDAGFactory.TrialNodeResult process(MarketProductEntity request, MarketDAGFactory.TrialContext context) throws Exception {
         log.info("DAG节点-营销试算开关校验: userId:{}", request.getUserId());
-
-        // 降级开关校验
-        if (activityRepository.downgradeSwitch()) {
-            // 如果降级开关打开，则抛出降级异常，终止试算流程
-            throw new AppException(ResponseCode.DOWNGRADE.getCode(), ResponseCode.DOWNGRADE.getInfo());
-        }
-        // 并发控制校验
-        if (!activityRepository.cutRange(request.getUserId())) {
-            // 如果用户不在允许的并发范围内，则抛出并发控制异常，终止试算流程
-            throw new AppException(ResponseCode.CNTRANGE.getCode(), ResponseCode.CNTRANGE.getInfo());
-        }
+ // 移到入口处统一校验
+//        // 降级开关校验
+//        if (activityRepository.downgradeSwitch()) {
+//            // 如果降级开关打开，则抛出降级异常，终止试算流程
+//            throw new AppException(ResponseCode.DOWNGRADE.getCode(), ResponseCode.DOWNGRADE.getInfo());
+//        }
+//        // 并发控制校验
+//        if (!activityRepository.cutRange(request.getUserId())) {
+//            // 如果用户不在允许的并发范围内，则抛出并发控制异常，终止试算流程
+//            throw new AppException(ResponseCode.CNTRANGE.getCode(), ResponseCode.CNTRANGE.getInfo());
+//        }
 
         return new MarketDAGFactory.TrialNodeResult(MarketDAGFactory.TrialNodeResult.TYPE_SWITCH_CHECK, true);
     }

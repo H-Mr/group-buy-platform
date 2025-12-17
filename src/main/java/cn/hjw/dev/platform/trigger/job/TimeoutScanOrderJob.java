@@ -32,27 +32,34 @@ public class TimeoutScanOrderJob {
 
     @Scheduled(cron = "* 0/5 * * * ?") // 每5分钟执行一次
     public void exec() {
-        try {
         // 定时查询超过15分钟未支付的订单，发布事件
-            log.info("任务；超时15分钟订单关闭");
-            List<String> orderIds = orderService.queryTimeoutCloseOrderList();
-            if (orderIds.isEmpty())
-                    return;
-            for (String orderId : orderIds) {
-                AlipayRequestGateway.AlipayOrderQueryResult queryResult = alipayRequestGateway.queryOrderPayStatus(orderId);
-                if (ObjectUtils.isNotEmpty(queryResult.isPaySuccess()) && queryResult.isPaySuccess()) {
-                    LocalDateTime payTime = LocalDateTime.parse(
-                            queryResult.getPayTime(),
-                            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-                    );
-                    orderStatusChangedEventType.publishOrderStatusChangedEvent(orderId, OrderStatusVO.PAY_SUCCESS,payTime);
-                } else {
-                    alipayRequestGateway.closeAlipayOrder(orderId); // 关闭支付宝订单
-                    orderStatusChangedEventType.publishOrderStatusChangedEvent(orderId, OrderStatusVO.CLOSE,null);
-                }
-            }
+        log.info("任务；超时15分钟订单关闭");
+        // 1. 获取任务列表（这一步如果挂了，确实没法跑，可以在最外层catch）
+        List<String> orderIds;
+        try {
+            orderIds = orderService.queryTimeoutCloseOrderList();
         } catch (Exception e) {
-            log.error("定时任务，回调通知拼团完结任务失败", e);
+        log.error("定时任务拉取订单失败", e);
+        return;
+        }
+        if (orderIds.isEmpty()) return;
+        for (String orderId : orderIds) {
+            //
+           try {
+               AlipayRequestGateway.AlipayOrderQueryResult queryResult = alipayRequestGateway.queryOrderPayStatus(orderId);
+               if (ObjectUtils.isNotEmpty(queryResult.isPaySuccess()) && queryResult.isPaySuccess()) {
+                   LocalDateTime payTime = LocalDateTime.parse(
+                           queryResult.getPayTime(),
+                           DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                   );
+                   orderStatusChangedEventType.publishOrderStatusChangedEvent(orderId, OrderStatusVO.PAY_SUCCESS,payTime);
+               } else {
+                   alipayRequestGateway.closeAlipayOrder(orderId); // 关闭支付宝订单
+                   orderStatusChangedEventType.publishOrderStatusChangedEvent(orderId, OrderStatusVO.CLOSE,null);
+               }
+           } catch (Exception e) {
+                 log.error("处理超时未支付订单失败，orderId：{}", orderId, e);
+           }
         }
     }
 

@@ -35,28 +35,32 @@ public class ExecuteNotifyProcessor implements DAGNodeProcessor<NotifyRequestEnt
         int successCount = 0, errorCount = 0, retryCount = 0;
 
         for (NotifyTaskEntity notifyTask : taskList) {
-            // 回调处理 success 成功，error 失败
-            String response = port.groupBuyNotify(notifyTask);
+              try {
+                  // 回调处理 success 成功，error 失败
+                  String response = port.groupBuyNotify(notifyTask);
 
-            // 更新状态判断&变更数据库表回调任务状态
-            if (NotifyTaskHTTPEnumVO.SUCCESS.getCode().equals(response)) {
-                int updateCount = tradeRepository.updateNotifyTaskStatusSuccess(notifyTask.getTeamId());
-                if (1 == updateCount) {
-                    successCount += 1;
-                }
-            } else if (NotifyTaskHTTPEnumVO.ERROR.getCode().equals(response)) {
-                if (notifyTask.getNotifyCount() < 5) { // 小于 5 次重试
-                    int updateCount = tradeRepository.updateNotifyTaskStatusRetry(notifyTask.getTeamId());
-                    if (1 == updateCount) {
-                        retryCount += 1;
-                    }
-                } else { // 超过 5 次则标记为失败
-                    int updateCount = tradeRepository.updateNotifyTaskStatusError(notifyTask.getTeamId());
-                    if (1 == updateCount) {
-                        errorCount += 1;
-                    }
-                }
-            }
+                  // 更新状态判断&变更数据库表回调任务状态
+                  if (NotifyTaskHTTPEnumVO.SUCCESS.getCode().equals(response)) {
+                      int updateCount = tradeRepository.updateNotifyTaskStatusSuccess(notifyTask.getTeamId());
+                      if (1 == updateCount) {
+                          successCount += 1;
+                      }
+                  } else if (NotifyTaskHTTPEnumVO.ERROR.getCode().equals(response)) {
+                      if (notifyTask.getNotifyCount() < 5) { // 小于 5 次重试
+                          int updateCount = tradeRepository.updateNotifyTaskStatusRetry(notifyTask.getTeamId());
+                          if (1 == updateCount) {
+                              retryCount += 1;
+                          }
+                      } else { // 超过 5 次则标记为失败
+                          int updateCount = tradeRepository.updateNotifyTaskStatusError(notifyTask.getTeamId());
+                          if (1 == updateCount) {
+                              errorCount += 1;
+                          }
+                      }
+                  }
+              } catch (Exception e) {
+                  log.error("DAG-Notify: 执行回调任务异常，teamId: {}, error: {}", notifyTask.getTeamId(), e.getMessage(), e);
+              }
         }
 
         log.info("DAG-Notify: 批量执行完成，总数:{} 成功:{} 失败: {} 重试： {}", taskList.size(), successCount,errorCount,retryCount);

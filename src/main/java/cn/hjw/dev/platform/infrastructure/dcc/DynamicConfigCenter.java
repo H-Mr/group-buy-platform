@@ -28,6 +28,23 @@ public class DynamicConfigCenter {
     @DCCValue(value = "scBlacklist:s02c02,s03c03", description = "渠道黑名单 (逗号分隔)")
     private volatile String scBlacklist = "s02c02,s03c03";
 
+    // 体验 Token 开关及配置 (新增)
+    @Getter
+    @DCCValue(value = "demoTokenSwitch:0", description = "演示Token开关 (0-关闭 1-开启)")
+    private volatile String demoTokenSwitch = "0";
+
+    @Getter
+    @DCCValue(value = "demoTokenSecret:Bearer experience-token-vip-888", description = "演示专用Token串")
+    private volatile String demoTokenSecret = "experience-token-vip-888";
+
+    @Getter
+    @DCCValue(value = "demoUserId:test_user_001", description = "演示用户ID，可以自定义表示不同用户")
+    private volatile String demoUserId = "7736117232733921470425906184967298691211750310624021055982293696";
+
+    public boolean isDemoTokenOpen() {
+        return "1".equals(demoTokenSwitch);
+    }
+
     /**
      * 业务逻辑封装
      */

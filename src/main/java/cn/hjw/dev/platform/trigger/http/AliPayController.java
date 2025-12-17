@@ -9,11 +9,14 @@ import cn.hjw.dev.platform.domain.order.model.entity.ShopCartEntity;
 import cn.hjw.dev.platform.domain.order.model.valobj.MarketTypeVO;
 import cn.hjw.dev.platform.domain.order.model.valobj.OrderStatusVO;
 import cn.hjw.dev.platform.domain.order.service.IOrderService;
+import cn.hjw.dev.platform.infrastructure.dcc.DynamicConfigCenter;
 import cn.hjw.dev.platform.types.enums.ResponseCode;
 import cn.hjw.dev.platform.types.utils.UserContext;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.internal.util.AlipaySignature;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,11 +41,19 @@ public class AliPayController implements IPayService {
     @Value("${alipay.alipay_public_key}")
     private String alipayPublicKey;
 
+    @Value("${app.config.group-buy-market.source}")
+    private String source;
+    @Value("${app.config.group-buy-market.chanel}")
+    private String chanel;
+
     @Resource
     private IOrderService orderService; // 锁单
 
     @Resource
     private OrderStatusChangedEventType orderStatusChangedEventType;
+
+    @Resource
+    private DynamicConfigCenter dynamicConfigCenter;
 
     // 支付宝回调时间格式（固定：yyyy-MM-dd HH:mm:ss）
     private static final DateTimeFormatter ALIPAY_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -56,18 +67,51 @@ public class AliPayController implements IPayService {
     @RequestMapping(value = "create_pay_order", method =  RequestMethod.POST)
     @Override
     public Response<String> createPayOrder(@RequestBody CreatePayRequestDTO createPayRequestDTO) {
+        // 进行DCC校验
+        if(dynamicConfigCenter.isDowngrade()) {
+            return Response.<String>builder().code(ResponseCode.SUCCESS.getCode())
+                    .info("系统繁忙，请稍后再试")
+                    .build();
+        }
         String userId = UserContext.getUserId();
         try {
             log.info("商品下单，根据商品ID创建支付单开始 userId:{} productId:{}", userId, createPayRequestDTO.getProductId());
-            // todo 判断参数是否有效
             String productId = createPayRequestDTO.getProductId();
+            Long activityId = createPayRequestDTO.getActivityId();
+            String dtoSource = createPayRequestDTO.getSource();
+            String dtoChannel = createPayRequestDTO.getChannel();
+            String teamId = createPayRequestDTO.getTeamId();
+            if(StringUtils.isBlank(productId) || ObjectUtils.isEmpty(activityId)) {
+                log.info("商品下单，根据商品ID创建支付单失败，参数无效 userId:{} productId:{}", userId, productId);
+                return Response.<String>builder()
+                        .code(ResponseCode.ILLEGAL_PARAMETER.getCode())
+                        .info("错误参数")
+                        .build();
+            }
+            // 补充渠道，来源
+            if (StringUtils.isAnyBlank(dtoSource,dtoChannel)) {
+                    dtoSource = source;
+                    dtoChannel = chanel;
+            }
+            // 判断是否系统切量，黑名单
+            if(!dynamicConfigCenter.isCutRange(userId)
+                    || dynamicConfigCenter.isSCBlackIntercept(dtoSource, dtoChannel)) {
+                log.info("商品下单，根据商品ID创建支付单失败，系统切量或黑名单拦截 userId:{} productId:{}", userId, productId);
+                return Response.<String>builder()
+                        .code(ResponseCode.SUCCESS.getCode())
+                        .info("系统繁忙，请稍后再试")
+                        .build();
+            }
+
             // 下单，会检验是否存在未支付订单，存在则直接返回支付地址
             PayOrderEntity payOrderEntity = orderService.createOrder(ShopCartEntity.builder()
                     .userId(userId) // 用户ID
                     .productId(productId) // 商品ID
                     .marketTypeVO(MarketTypeVO.GROUP_BUY_MARKET)
-                    .activityId(createPayRequestDTO.getActivityId())
-                    .teamId(createPayRequestDTO.getTeamId())
+                    .activityId(activityId)
+                    .teamId(teamId)
+                    .source(dtoSource)
+                    .channel(dtoChannel)
                     .build());
 
             log.info("商品下单，根据商品ID创建支付单完成 userId:{} productId:{} orderId:{}", userId, productId, payOrderEntity.getOrderId());
@@ -80,7 +124,7 @@ public class AliPayController implements IPayService {
             log.error("商品下单，根据商品ID创建支付单失败 userId:{} productId:{}", userId, createPayRequestDTO.getProductId(), e);
             return Response.<String>builder()
                     .code(ResponseCode.UN_ERROR.getCode())
-                    .info(ResponseCode.UN_ERROR.getInfo())
+                    .info("下单失败，请稍后再试")
                     .build();
         }
     }

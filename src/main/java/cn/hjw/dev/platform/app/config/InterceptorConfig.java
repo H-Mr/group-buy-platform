@@ -1,6 +1,7 @@
 package cn.hjw.dev.platform.app.config;
 
 import cn.hjw.dev.platform.app.interceptor.LoginInterceptor;
+import cn.hjw.dev.platform.infrastructure.dcc.DynamicConfigCenter;
 import cn.hjw.dev.platform.types.utils.JwtUtils;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -14,14 +15,18 @@ public class InterceptorConfig implements WebMvcConfigurer {
     @Resource
     private JwtUtils jwtUtils;
 
+    @Resource
+    private DynamicConfigCenter dynamicConfigCenter;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // 注册 LoginInterceptor
-        registry.addInterceptor(new LoginInterceptor(jwtUtils))
+        registry.addInterceptor(new LoginInterceptor(jwtUtils,dynamicConfigCenter))
                 // 指定拦截的路径
                 .addPathPatterns("/api/v1/**")
-                // 排除登录接口
+                // 排除登录接口,刷新token接口
                 .excludePathPatterns("/api/v1/login/**")
+                .excludePathPatterns("/api/v1/login/refresh_token")
                 // 排除第三方回调接口
                 .excludePathPatterns("/api/v1/weixin/portal/**")
                 .excludePathPatterns("/api/v1/alipay/alipay_notify_url")
