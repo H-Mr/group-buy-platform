@@ -2,6 +2,7 @@ package cn.hjw.dev.platform.trigger.http;
 
 import cn.hjw.dev.platform.api.IAuthService;
 import cn.hjw.dev.platform.api.dto.AuthTokenResponseDTO;
+import cn.hjw.dev.platform.api.dto.WeixinQrCodeResponseDTO;
 import cn.hjw.dev.platform.api.response.Response;
 import cn.hjw.dev.platform.domain.auth.service.ILoginService;
 import cn.hjw.dev.platform.types.enums.ResponseCode;
@@ -34,22 +35,18 @@ public class LoginController implements IAuthService {
      */
     @RequestMapping(value = "weixin_qrcode", method = RequestMethod.GET)
     @Override
-    public Response<String> weixinQrCodeTicket() {
-        try {
-            String image = loginService.generateLoginQrCodeImage();
-            log.info("生成微信二维码 image:{}", image);
-            return Response.<String>builder()
-                    .code(ResponseCode.SUCCESS.getCode())
-                    .info(ResponseCode.SUCCESS.getInfo())
-                    .data(image)
-                    .build();
-        } catch (Exception e) {
-            log.error("生成微信扫码登录 ticket 失败", e);
-            return Response.<String>builder()
-                    .code(ResponseCode.UN_ERROR.getCode())
-                    .info(ResponseCode.UN_ERROR.getInfo())
-                    .build();
+    public Response<WeixinQrCodeResponseDTO> weixinQrCodeTicket() throws Exception {
+
+        WeixinQrCodeResponseDTO weixinQrCodeResponseDTO = loginService.generateLoginQrCodeImage();
+        if (ObjectUtils.isEmpty(weixinQrCodeResponseDTO)) {
+            log.error("获取微信登录二维码失败");
+            throw new AppException(ResponseCode.UN_ERROR.getCode(), "获取微信登录二维码失败");
         }
+        return Response.<WeixinQrCodeResponseDTO>builder()
+                .code(ResponseCode.SUCCESS.getCode())
+                .info(ResponseCode.SUCCESS.getInfo())
+                .data(weixinQrCodeResponseDTO)
+                .build();
     }
 
     /**
@@ -77,7 +74,7 @@ public class LoginController implements IAuthService {
      * @param refreshToken 刷新令牌
      * 前端拦截器发现 401 后，携带 refreshToken 调用此接口
      */
-    @PostMapping("refresh_token")
+    @GetMapping("refresh_token")
     public Response<AuthTokenResponseDTO> refreshToken(@RequestParam String refreshToken) {
 
             AuthTokenResponseDTO tokenInfo = loginService.refreshAccessToken(refreshToken);

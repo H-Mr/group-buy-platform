@@ -1,6 +1,7 @@
 package cn.hjw.dev.platform.domain.auth.service.impl;
 
 import cn.hjw.dev.platform.api.dto.AuthTokenResponseDTO;
+import cn.hjw.dev.platform.api.dto.WeixinQrCodeResponseDTO;
 import cn.hjw.dev.platform.domain.auth.adapter.port.ILoginPort;
 import cn.hjw.dev.platform.domain.auth.adapter.repository.IAuthRepository;
 import cn.hjw.dev.platform.domain.auth.service.ILoginService;
@@ -37,9 +38,14 @@ public class WeixinLoginServiceImpl implements ILoginService {
 
 
     @Override
-    public String generateLoginQrCodeImage() throws Exception {
+    public WeixinQrCodeResponseDTO generateLoginQrCodeImage() throws Exception {
+        // 1. 获取 Ticket (这是轮询的关键钥匙)
         String qrCodeTicket = loginPort.createQrCodeTicket();
-        return loginPort.generateLoginQrCodeImage(qrCodeTicket);
+        // 2. 根据 Ticket 获取图片 Base64
+        String image = loginPort.generateLoginQrCodeImage(qrCodeTicket);
+        return WeixinQrCodeResponseDTO.builder()
+                .ticket(qrCodeTicket)
+                .tokenImage(image).build();
     }
 
     @Override

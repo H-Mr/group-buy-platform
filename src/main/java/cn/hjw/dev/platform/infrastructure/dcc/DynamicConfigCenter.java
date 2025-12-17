@@ -38,7 +38,7 @@ public class DynamicConfigCenter {
     private volatile String demoTokenSecret = "experience-token-vip-888";
 
     @Getter
-    @DCCValue(value = "demoUserId:test_user_001", description = "演示用户ID，可以自定义表示不同用户")
+    @DCCValue(value = "demoUserId:7736117232733921470425906184967298691211750310624021055982293696", description = "演示用户ID，可以自定义表示不同用户")
     private volatile String demoUserId = "7736117232733921470425906184967298691211750310624021055982293696";
 
     public boolean isDemoTokenOpen() {

@@ -1,6 +1,7 @@
 package cn.hjw.dev.platform.domain.auth.service;
 
 import cn.hjw.dev.platform.api.dto.AuthTokenResponseDTO;
+import cn.hjw.dev.platform.api.dto.WeixinQrCodeResponseDTO;
 
 import java.io.IOException;
 
@@ -27,7 +28,7 @@ public interface ILoginService {
      * @return
      * @throws Exception
      */
-    String generateLoginQrCodeImage() throws Exception;
+    WeixinQrCodeResponseDTO generateLoginQrCodeImage() throws Exception;
 
     AuthTokenResponseDTO refreshAccessToken(String refreshToken);
 }
