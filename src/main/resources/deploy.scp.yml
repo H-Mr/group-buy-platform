@@ -133,34 +133,53 @@ jobs:
           rm template-prod.yml # 删除模板文件，不传输给服务器
           echo "✅ 生产环境配置生成成功"
 
-      # 4. 传输文件到服务器，使用 rsync 替代 scp 传输
-      # 4. 传输文件到服务器，使用 rsync 替代 scp 传输
-      - name: Transfer files to server via rsync
+      # 4. 传输文件到服务器 (SCP)
+      # 在传输文件前，先检查服务器目录是否存在
+      # 这可以解决第一次部署时 "No such file" 的问题
+      - name: Check server directory
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            # 如果目录不存在，则创建并赋权
+            if [ ! -d "/opt/group-buy-platform" ]; then
+              echo "目录不存在，正在创建..."
+              # 如果你是 root 用户登录，直接创建
+              mkdir -p /opt/group-buy-platform
+            fi
+      # 新增：打包文件（放在SCP步骤前）
+      - name: Package all files for SCP
         run: |
-          # 确保本地 runner 安装 rsync（ubuntu-latest 已预装）
-          if ! command -v rsync &> /dev/null; then
-            echo "安装 rsync..."
-            sudo apt update && sudo apt install -y rsync
-          fi
+          tar -zcf deploy.tar.gz app.jar Dockerfile docker-compose.yml sql/ application-prod.yml *.sh
 
-          # 配置 SSH 密钥（将 secrets 中的私钥写入临时文件）
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa  # 必须设置 600 权限，否则 SSH 会拒绝使用
-          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts  # 避免首次连接的交互提示
+      - name: Transfer files to server via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          # 此时当前目录下就是我们需要的所有文件
+          source: deploy.tar.gz
+          target: /opt/group-buy-platform
+          overwrite: true
+          port: 22
+          timeout: 30s
+          command_timeout: 10m
 
-          # 执行 rsync 同步（源为 Runner 本地文件，目标为远程服务器目录）
-          rsync -avz \
-            --delete \
-            --exclude='.git' \
-            ./app.jar \
-            ./Dockerfile \
-            ./docker-compose.yml \
-            ./sql/ \
-            ./application-prod.yml \
-            ./*.sh \
-            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/opt/group-buy-platform/
-          echo "✅ rsync 传输完成"
+      # 新增：服务器端解压文件（通过SSH步骤）
+      - name: Unpack files on server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /opt/group-buy-platform
+            tar -zxf deploy.tar.gz  # 解压
+            rm -f deploy.tar.gz     # 可选：删除压缩包，清理空间
+            
 
       # 5. 远程执行部署 (SSH)
       - name: Deploy application via SSH
