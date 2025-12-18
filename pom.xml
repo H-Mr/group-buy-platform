@@ -179,6 +179,8 @@
       <groupId>io.github.cdimascio</groupId>
       <artifactId>java-dotenv</artifactId>
       <version>5.2.2</version>
+        <!-- provided：编译时可用，打包时默认不包含 -->
+        <scope>provided</scope>
     </dependency>
 
 <!--
@@ -370,6 +372,7 @@ repackage 虽然默认绑定到 package 阶段，但显式配置 <executions> �
         <profileActive>dev</profileActive>
       </properties>
     </profile>
+
     <profile>
       <id>test</id>
       <properties>
@@ -385,5 +388,4 @@ repackage 虽然默认绑定到 package 阶段，但显式配置 <executions> �
       </properties>
     </profile>
   </profiles>
-
 </project>
