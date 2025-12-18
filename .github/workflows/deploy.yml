@@ -134,32 +134,46 @@ jobs:
           echo "✅ 生产环境配置生成成功"
 
       # 4. 传输文件到服务器，使用 rsync 替代 scp 传输
-      # 4. 传输文件到服务器，使用 rsync 替代 scp 传输
       - name: Transfer files to server via rsync
         run: |
-          # 确保本地 runner 安装 rsync（ubuntu-latest 已预装）
+          echo "==== 开始配置 rsync 环境 ===="
+          
+          # 1. 安装 rsync (如果不存在)
           if ! command -v rsync &> /dev/null; then
-            echo "安装 rsync..."
-            sudo apt update && sudo apt install -y rsync
+            echo "🛠 安装 rsync..."
+            sudo apt-get update && sudo apt-get install -y rsync
           fi
 
-          # 配置 SSH 密钥（将 secrets 中的私钥写入临时文件）
+          # 2. 配置 SSH 密钥 (关键步骤)
           mkdir -p ~/.ssh
+          
+          # 将 Secret 中的私钥写入文件
           echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa  # 必须设置 600 权限，否则 SSH 会拒绝使用
-          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts  # 避免首次连接的交互提示
+          chmod 600 ~/.ssh/id_rsa
+          
+          # 3. 解决 Host Key Verification 问题
+          # 自动将服务器指纹加入 known_hosts，防止交互式询问导致卡死
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
-          # 执行 rsync 同步（源为 Runner 本地文件，目标为远程服务器目录）
-          rsync -avz \
-            --delete \
+          echo "==== 开始执行 rsync 同步 ===="
+          # 参数解释：
+          # -a: 归档模式，保留权限、时间戳等
+          # -v: 显示详细过程
+          # -z: 传输时压缩
+          # --delete: 删除目标目录中有但源目录中没有的文件 (保持目录干净)
+          # --progress: 显示进度条 (方便在 GitHub Logs 里看卡没卡)
+          
+          rsync -avz --delete --progress \
             --exclude='.git' \
+            --exclude='.github' \
             ./app.jar \
             ./Dockerfile \
             ./docker-compose.yml \
-            ./sql/ \
+            ./sql \
             ./application-prod.yml \
             ./*.sh \
             ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/opt/group-buy-platform/
+          
           echo "✅ rsync 传输完成"
 
       # 5. 远程执行部署 (SSH)
