@@ -39,149 +39,211 @@
 
   <dependencies>
 
+<!--
+ ============================================================
+        一、Spring Boot 核心与基础组件
+  ============================================================
+ -->
+    <!-- Spring Boot Web核心（包含Tomcat、Spring MVC等） -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <!-- 配置文件处理器（支持@ConfigurationProperties注解的IDE提示） -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+    </dependency>
+
+    <!-- 应用监控与管理（提供健康检查、指标暴露等端点） -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
 
-    <!-- MySQL 健康检查（JDBC 方式） -->
+    <!-- 测试支持（包含JUnit、Spring Test等） -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+    </dependency>
+
+<!--
+ ============================================================
+        二、数据访问与存储
+  ============================================================
+ -->
+    <!-- JDBC支持（含数据库连接池，用于MySQL健康检查等） -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-jdbc</artifactId>
     </dependency>
 
-    <!-- http 接口框架 https://hjw.dev.cn/md/road-map/http.html -->
-    <dependency>
-      <groupId>com.squareup.okhttp3</groupId>
-      <artifactId>okhttp-sse</artifactId>
-      <version>3.14.9</version>
-    </dependency>
+    <!-- MyBatis集成（ORM框架，简化数据库操作） -->
     <dependency>
       <groupId>org.mybatis.spring.boot</groupId>
       <artifactId>mybatis-spring-boot-starter</artifactId>
       <version>2.1.4</version>
     </dependency>
 
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
-    </dependency>
-
-      <dependency>
-          <groupId>org.springframework.boot</groupId>
-          <artifactId>spring-boot-starter-test</artifactId>
-      </dependency>
-
+    <!-- MySQL驱动（连接MySQL数据库） -->
     <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
       <version>8.0.22</version>
     </dependency>
-    <dependency>
-      <groupId>com.alibaba</groupId>
-      <artifactId>fastjson</artifactId>
-      <version>2.0.28</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-      <version>3.9</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>32.1.3-jre</version>
-    </dependency>
-    <dependency>
-      <groupId>dom4j</groupId>
-      <artifactId>dom4j</artifactId>
-      <version>1.6.1</version>
-    </dependency>
-    <dependency>
-      <groupId>com.thoughtworks.xstream</groupId>
-      <artifactId>xstream</artifactId>
-      <version>1.4.10</version>
-    </dependency>
 
-    <dependency>
-      <groupId>com.auth0</groupId>
-      <artifactId>java-jwt</artifactId>
-      <version>4.4.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-      <version>1.15</version>
-    </dependency>
-
+    <!-- Redisson集成（Redis客户端，支持分布式锁、对象映射等） -->
     <dependency>
       <groupId>org.redisson</groupId>
       <artifactId>redisson-spring-boot-starter</artifactId>
       <version>3.44.0</version>
     </dependency>
 
-    <!-- JWT -->
+<!--
+ ============================================================
+       三、HTTP 客户端与接口调用
+  ============================================================
+ -->
+    <!-- OkHttp SSE支持（HTTP客户端，支持服务器推送事件） -->
     <dependency>
-      <groupId>io.jsonwebtoken</groupId>
-      <artifactId>jjwt-api</artifactId>
-      <version>0.11.5</version>
-    </dependency>
-    <dependency>
-      <groupId>io.jsonwebtoken</groupId>
-      <artifactId>jjwt-impl</artifactId>
-      <version>0.11.5</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.jsonwebtoken</groupId>
-      <artifactId>jjwt-jackson</artifactId>
-      <version>0.11.5</version>
-      <scope>runtime</scope>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>okhttp-sse</artifactId>
+      <version>3.14.9</version>
     </dependency>
 
+    <!-- Retrofit（HTTP接口封装框架，简化API调用） -->
     <dependency>
       <groupId>com.squareup.retrofit2</groupId>
       <artifactId>retrofit</artifactId>
       <version>2.9.0</version>
     </dependency>
+
+    <!-- Retrofit-Jackson转换器（支持JSON与对象的自动转换） -->
     <dependency>
       <groupId>com.squareup.retrofit2</groupId>
       <artifactId>converter-jackson</artifactId>
       <version>2.9.0</version>
     </dependency>
 
-    <!-- 支付宝沙箱支付对接文档：https://opendocs.alipay.com/common/02kkv7 -->
+<!--
+ ============================================================
+       四、工具类与数据处理
+  ============================================================
+-->
+    <!-- FastJSON（JSON序列化/反序列化工具） -->
     <dependency>
-      <groupId>com.alipay.sdk</groupId>
-      <artifactId>alipay-sdk-java</artifactId>
-      <version>4.38.157.ALL</version>
+      <groupId>com.alibaba</groupId>
+      <artifactId>fastjson</artifactId>
+      <version>2.0.28</version>
     </dependency>
 
-<!--    DAGFlow-->
+    <!-- Apache Commons Lang（字符串、数组等工具类） -->
     <dependency>
-      <groupId>hjw.dev</groupId>
-      <artifactId>DAGFlow</artifactId>
-      <version>0.0.1</version>
-      <scope>system</scope> <!-- 核心：不走远程解析，直接读本地文件 -->
-      <systemPath>${project.basedir}/lib/DAGFlow-0.0.1.jar</systemPath> <!-- 本地 JAR 路径 -->
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.9</version>
     </dependency>
 
+    <!-- Commons Codec（编码工具，支持Base64、MD5等） -->
     <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.15</version>
     </dependency>
 
+    <!-- Guava（Google工具类库，含集合、缓存等增强功能） -->
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-configuration-processor</artifactId>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>32.1.3-jre</version>
     </dependency>
 
+    <!-- Dom4j（XML解析工具） -->
+    <dependency>
+      <groupId>dom4j</groupId>
+      <artifactId>dom4j</artifactId>
+      <version>1.6.1</version>
+    </dependency>
+
+    <!-- XStream（XML与对象映射工具） -->
+    <dependency>
+      <groupId>com.thoughtworks.xstream</groupId>
+      <artifactId>xstream</artifactId>
+      <version>1.4.10</version>
+    </dependency>
+
+
+    <!-- Dotenv（加载.env环境变量文件） -->
     <dependency>
       <groupId>io.github.cdimascio</groupId>
       <artifactId>java-dotenv</artifactId>
       <version>5.2.2</version>
     </dependency>
+
+<!--
+     ============================================================
+           五、安全认证（JWT）
+     ============================================================
+-->
+    <!-- JJWT核心API（编译时依赖） -->
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-api</artifactId>
+      <version>0.11.5</version>
+    </dependency>
+
+    <!-- JJWT实现（运行时依赖） -->
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-impl</artifactId>
+      <version>0.11.5</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <!-- JJWT-Jackson（JSON序列化支持，运行时依赖） -->
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-jackson</artifactId>
+      <version>0.11.5</version>
+      <scope>runtime</scope>
+    </dependency>
+<!--
+     ============================================================
+          六、支付对接（支付宝）
+     ============================================================
+-->
+    <!-- 支付宝SDK（对接支付宝支付接口） -->
+    <dependency>
+      <groupId>com.alipay.sdk</groupId>
+      <artifactId>alipay-sdk-java</artifactId>
+      <version>4.38.157.ALL</version>
+    </dependency>
+    <!--
+     ============================================================
+          七、本地依赖（系统级）
+     ============================================================
+    -->
+    <!-- DAGFlow（本地JAR包，系统级依赖，需配合lib目录下的JAR使用） -->
+    <dependency>
+      <groupId>hjw.dev</groupId>
+      <artifactId>DAGFlow</artifactId>
+      <version>0.0.1</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/lib/DAGFlow-0.0.1.jar</systemPath>
+    </dependency>
+
+<!--
+   ============================================================
+        八、开发工具
+   ============================================================
+-->
+    <!-- Lombok（通过注解自动生成getter/setter、构造器等） -->
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+    </dependency>
+
   </dependencies>
 
 

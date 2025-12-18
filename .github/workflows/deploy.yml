@@ -149,6 +149,11 @@ jobs:
               # 如果你是 root 用户登录，直接创建
               mkdir -p /opt/group-buy-platform
             fi
+      # 新增：打包文件（放在SCP步骤前）
+      - name: Package all files for SCP
+        run: |
+          tar -zcf deploy.tar.gz app.jar Dockerfile docker-compose.yml sql/ application-prod.yml *.sh
+
       - name: Transfer files to server via SCP
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -156,9 +161,26 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           # 此时当前目录下就是我们需要的所有文件
-          source: "app.jar,Dockerfile,docker-compose.yml,sql,application-prod.yml,*.sh"
-          target: "/opt/group-buy-platform"
+          source: deploy.tar.gz
+          target: /opt/group-buy-platform
           overwrite: true
+          port: 22
+          timeout: 30s
+          command_timeout: 10m
+
+      # 新增：服务器端解压文件（通过SSH步骤）
+      - name: Unpack files on server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /opt/group-buy-platform
+            tar -zxf deploy.tar.gz  # 解压
+            rm -f deploy.tar.gz     # 可选：删除压缩包，清理空间
+            
+
       # 5. 远程执行部署 (SSH)
       - name: Deploy application via SSH
         uses: appleboy/ssh-action@v1.0.3
