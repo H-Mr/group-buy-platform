@@ -1,0 +1,94 @@
+version: '3.8'
+
+# 定义通用环境变量（复用，减少冗余）
+x-common-env: &common-env
+  TZ: Asia/Shanghai
+
+services:
+  # 1. MySQL 数据库服务
+  mysql:
+    image: registry.cn-hangzhou.aliyuncs.com/xfg-studio/mysql:8.0.32
+    container_name: platform-mysql
+    restart: always
+    environment:
+      <<: *common-env  # 复用通用时区配置
+      MYSQL_ROOT_PASSWORD: group_buy_mysql_admin
+      MYSQL_DATABASE: group_buy_market
+      MYSQL_INITDB_SKIP_TZINFO: 1  # 避免时区初始化警告
+    ports:
+      - "13307:3306"
+    volumes:
+      - ./data/mysql:/var/lib/mysql           # 数据持久化
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql # 首次启动建表
+    # 补充默认时区，确保数据库时间与应用一致
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-time_zone='+8:00'
+    networks:
+      - platform-net
+    # 健康检查（确保MySQL可正常连接）
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pgroup_buy_mysql_admin"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 10s  # 给MySQL初始化时间
+
+  # 2. Redis 缓存服务
+  redis:
+    image: registry.cn-hangzhou.aliyuncs.com/xfg-studio/redis:6.2
+    container_name: platform-redis
+    restart: always
+    environment:
+      <<: *common-env  # 复用通用时区配置
+    ports:
+      - "16380:6379"
+    volumes:
+      - ./data/redis:/data  # 持久化AOF/RDB文件
+    # 补充时区配置，对齐应用时区
+    command: redis-server --appendonly yes --requirepass "group_buy_redis_admin"
+    networks:
+      - platform-net
+    # Redis健康检查
+    healthcheck:
+      test: ["CMD", "redis-cli", "-h", "127.0.0.1", "-a", "group_buy_redis_admin", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  # 3. Java 后端应用
+  app:
+    build: .  # 基于当前目录Dockerfile构建
+    image: platform-app:v1.0
+    container_name: platform-app
+    restart: always
+    environment:
+      <<: *common-env  # 复用通用时区配置
+      # 可覆盖Dockerfile中的JAVA_OPTS，无需重建镜像
+      JAVA_OPTS: "-Xms512m -Xmx512m -XX:+UseG1GC -XX:MaxMetaspaceSize=128m -Dfile.encoding=UTF-8 -Djava.security.egd=file:/dev/./urandom"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./logs:/app/logs                # 挂载日志目录
+      - ./config:/app/config            # 挂载外部配置（优先级高于Jar包内配置）
+    depends_on:
+      mysql:
+        condition: service_healthy  # MySQL健康后启动
+      redis:
+        condition: service_healthy  # Redis健康后启动
+    networks:
+      - platform-net
+    # 应用健康检查（基于Spring Boot Actuator，需确保应用引入actuator依赖）
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 60s  # 给Spring Boot启动时间（如加载配置、连接数据库）
+
+# 自定义桥接网络（隔离容器，避免网段冲突）
+networks:
+  platform-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16  # 自定义子网，避免与宿主机/其他容器网段冲突
