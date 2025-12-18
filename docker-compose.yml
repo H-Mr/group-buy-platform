@@ -12,7 +12,7 @@ services:
     restart: always
     environment:
       <<: *common-env  # 复用通用时区配置
-      MYSQL_ROOT_PASSWORD: group_buy_mysql_admin
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: group_buy_market
       MYSQL_INITDB_SKIP_TZINFO: 1  # 避免时区初始化警告
     ports:
@@ -26,7 +26,7 @@ services:
       - platform-net
     # 健康检查（确保MySQL可正常连接）
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pgroup_buy_mysql_admin"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 5s
       timeout: 3s
       retries: 3
@@ -44,12 +44,12 @@ services:
     volumes:
       - ./data/redis:/data  # 持久化AOF/RDB文件
     # 补充时区配置，对齐应用时区
-    command: redis-server --appendonly yes --requirepass "group_buy_redis_admin"
+    command: redis-server --appendonly yes --requirepass "${REDIS_PASSWORD}"
     networks:
       - platform-net
     # Redis健康检查
     healthcheck:
-      test: ["CMD", "redis-cli", "-h", "127.0.0.1", "-a", "group_buy_redis_admin", "ping"]
+      test: ["CMD", "redis-cli", "-h", "127.0.0.1", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 10s
       timeout: 5s
       retries: 3

@@ -1,5 +1,5 @@
 server:
-  port: 8091
+  port: ${SERVER_PORT} # 容器内部端口
 
 # 线程池配置
 thread:
@@ -49,7 +49,7 @@ spring:
   datasource:
     username: root
     password: 123456
-    url: jdbc:mysql://111.228.51.8:13306/group_buy_market?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&useSSL=true
+    url: jdbc:mysql:/${SERVER_HOST}:13306/${MYSQL_DATABASE}?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&useSSL=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       pool-name: Retail_HikariCP
@@ -87,26 +87,25 @@ redis:
 # 微信公众号对接
 weixin:
   config:
-    originalid: gh_d64dcc5d0a60
-    token: b8b6
-    app-id: wx48a01514c5bc10e7
-    app-secret: ec0b67f0cbc025c73137f13e342eb62c
+    originalid: ${WEIXIN_ORIGINAL_ID}
+    token: ${WEIXIN_TOKEN}
+    app-id: ${WEIXIN_APP_ID}
+    app-secret: ${WEIXIN_APP_SECRET}
     template_id: luFYa6dPjgxv3Adr6tIxeXgxtXT2er2jwSGprZb-S5w
 
 
 jwt:
-  secret: afae98e1bfbd25bbb0549ee4e1e0448003c9fb714d84d45d1b7e9f0e99e8d056
+  secret: ${JWT_SECRET}
   expire: 7200 # Token有效期（秒）(2小时)
 
 # 支付宝支付 - 沙箱 https://opendocs.alipay.com/common/02kkv7
 alipay:
-  app_id: 9021000157621491
-  alipay_public_key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAo4OqPqOlkFX9buHWXdYlrtq3jVPl4Bsk3kpinDihzmjXTnF2rWBOUxmDWQ/caSt76+XqSuEp9ZQHP03Qwog1dq7Kjes46BtlfCyDA4HeMtjtF8QGCZjVCGzFH+mKhygRF+YWSKqakuD56Lkm3mtz8UVn8U1ZgAw5u5MXkqv6OS6AG1YDRBT/kZTHIYwjgR8d1WufJYS9V/SPSQaXTvlSd3eyieI4De+giNcX5e9axY7VBQvjzY1po0MuzHxvOBsHnEV4bTtxORu0CpHX9YufsUYTFjU6cxqNbLr02rpu6JmfX7XOuGALGIt+TvtmHYhL0zGbryjJMx+dcUsLqpqGtQIDAQAB
-  merchant_private_key: MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCorrmJGT69v+pUFHWwYC6PvX4+sxPW+BgENGk2msoaJMzpYDerLC3x2L/Zk9jMur2G1ayZGzq2tMQQ25uyYjzQuErYbCpKKPVPWZ0bAqoala9BiYeE6UwdgGdBXdprEVd6CCtduFkOdi5CWyHqG6vzaJGuIVP1tTBXJYogju4Uw7afVyqmFAO/i2jOfP3FLZeKh4RW/+8vIvSv2Auc5WarWvE/7RkzAXdZskCmXGZwwmzWvVvLZSYsWskJNLJUWmQ0nm4KTMKRSVCJrtKO9jPrgsRrnVpRtYNBG1LJJ4jig3uYWzjSlnGXYwDWPpQTD+2JVuRAijabjMwoJfL1s5uLAgMBAAECggEAam8VErSjKgdWTAc82zVVK81dQyKrehDA1qZbXOD+dNCTmw3jElamBtvE8fyf505NGC7q4RCVU4Nr01c+PqhNx0UBtN1LMc/2OUNKJijgPDYGh0vH/s1WAadrf4tArh4bHBzbgB850i4vsh7en2Emdkec5EqTN45EGjjNlw2Ym/B7Gal/Wyev2Qkt7fWHK4eblFNWeg1W3u1kwdtv5l3rhG2KoWMl+FKZJ66O1wqgcc5rURmErkcDweELBVJqpxvbwLleGMuirQqrVb6nr5AhC5G05trFKLox9KD9LMlleEwy+v7Kz19G1+Se5pZ1a+D+HrWxVIBTybZUoVU8JiXZQQKBgQDdoD8bdzmiJ7dWoY3dP1hKh85ANjIyKTeVxeaG+pj5bo4T7bEqmPWiWx7Y85Bj/GF4RQwjzXF6W1cEoUO5PzVfkLVR4tpfKQflRIB/30fAo9IT7nplB6wbXN1E7C3uvJqYlxLY9oZi5D0luvwVfx0jbXIc1UYiXJMCs0HeFiBFHQKBgQDC2FYPQNZAgVZUsb3RIENNuquHsqJZDZ57yspVBz7+VY6EYQ5fQH/pbz/QdfhJ/gTBdhOKpvYV2JysWLQBsNBo852jvjF83AOoYf4ma8hMk8tuODLIGY4FGC1Nne/uO5d+xPL0pauUhjTR+U0eIuPrV7887kCC7I0jGc0RSVnKxwKBgQC5D0oi4Rda89b/m78d8/sBoQz0SUz43bnwcmPgafi6rzosIdpCO59Aht3nQtpa4y9wghd0/eO3y/WJhC9MzB8BQZBmZAr8UwKoyt6R6Bu+HA0bX5MMMa/g2VZaauyf4RUmPWAbkx78DKGSk+RS/uWR453ZvazmnG6VXqGtlMQ1cQKBgQCNZHwfGYfgy3qgf1MlnOn6UAoFsQXK5e0qHCDzzwxReDixq9TIHoA0H70JQ3JoD2PYGB1aMorFk6kuEDigOXUjlBXDK1OyLd6hpGrP6ssxdtbbJwEC4DiFTeQiPQhNswTew4EjM83tO+68qNLjmaIXuFdYmfRKjeplnGWJs9brJQKBgANs5QLoA0L6jTuvYKoT2jqR55FMpksrnQnr/f68N9z76NTV+DjIXk26LYOTcMVfnJsUUpY/5Oii0iNbnpgYd8oQZTgdPZBIyqeGaMsANudqPBuCnXpuVQwHvCsMEJKB67ZDJRW9Bg60lAf2dx2BUnq9hGoiIbQDTvySIE6ncT+O
+  app_id: ${ALIPAY_APP_ID}
+  alipay_public_key: ${ALIPAY_PUBLIC_KEY}
+  merchant_private_key: ${ALIPAY_PRIVATE_KEY}
   gatewayUrl: https://openapi-sandbox.dl.alipaydev.com/gateway.do
-  notify_url: http://p7aecbf5.natappfree.cc/api/v1/alipay/alipay_notify_url
-  return_url:  http://p7aecbf5.natappfree.cc/success.html
-
+  notify_url: ${ALIPAY_PAY_NOTIFY_HOST}/api/v1/alipay/alipay_notify_url
+  return_url:  ${ALIPAY_PAY_NOTIFY_HOST}/success.html
 
 
 # 日志配置（匹配 Logback 中的 LOG_PATH 变量）

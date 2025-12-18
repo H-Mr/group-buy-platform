@@ -179,7 +179,15 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-configuration-processor</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>io.github.cdimascio</groupId>
+      <artifactId>java-dotenv</artifactId>
+      <version>5.2.2</version>
+    </dependency>
   </dependencies>
+
+
 
   <build>
     <plugins>
@@ -201,6 +209,10 @@
           <target>${maven.compiler.target}</target>
           <encoding>${project.build.sourceEncoding}</encoding>
           <!-- 可选但推荐：强制使用JAVA_HOME指定的JDK编译，避免环境冲突 -->
+<!--              <source>8</source>-->
+<!--              <target>8</target>  -->
+<!--          <fork>true</fork>-->
+<!--          <executable>D:\JAVA\jdk8u462-b08\jdk8u462-b08\bin\javac</executable>-->
         </configuration>
       </plugin>
 <!--      -->

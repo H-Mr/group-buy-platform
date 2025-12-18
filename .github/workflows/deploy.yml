@@ -96,13 +96,14 @@ jobs:
         with:
           name: deploy-package
           # 下载到当前工作目录 (会自动解压)
+
       # 2. 检查下载结果 (调试用)
       - name: Display structure of downloaded files
         run: ls -R
 
       # 3. 生成生产环境配置 (注入 Secrets)
       # 注意：此时读取的是下载下来的 template-prod.yml
-      - name: Generate application-prod.yml
+      - name: Generate application-prod.yml and docker-compose.yml
         env:
           # 必须在这里把 Secrets 映射为环境变量，envsubst 才能读取到
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
@@ -120,6 +121,15 @@ jobs:
             < template-prod.yml \
             > application-prod.yml
           echo "成功生成部署配置文件 application-prod.yml"
+          
+           # 处理 docker-compose.yml（替换敏感变量）
+          envsubst '${MYSQL_ROOT_PASSWORD} ${REDIS_PASSWORD}' \
+          < docker-compose.yml \
+          > docker-compose.prod.yml
+          # 替换原文件（后续部署使用替换后的文件）
+          mv -f docker-compose.prod.yml docker-compose.yml
+          echo "✅ 生成含敏感信息的 docker-compose.yml"
+          
           rm template-prod.yml # 删除模板文件，不传输给服务器
           echo "✅ 生产环境配置生成成功"
 
