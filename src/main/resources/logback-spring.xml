@@ -36,7 +36,7 @@
                 <maxFileSize>10MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
             <maxHistory>15</maxHistory> <!-- 保留15天 -->
-            <totalSizeCap>10GB</totalSizeCap> <!-- 总大小限制 -->
+            <totalSizeCap>1GB</totalSizeCap> <!-- 总大小限制 -->
             <cleanHistoryOnStart>true</cleanHistoryOnStart> <!-- 启动时清理过期日志 -->
         </rollingPolicy>
         <!-- 只输出 INFO 及以上（排除 DEBUG/TRACE） -->
@@ -60,7 +60,7 @@
                 <maxFileSize>100MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
             <maxHistory>30</maxHistory> <!-- ERROR日志保留30天（便于排查历史故障） -->
-            <totalSizeCap>5GB</totalSizeCap>
+            <totalSizeCap>512MB</totalSizeCap>
             <cleanHistoryOnStart>true</cleanHistoryOnStart>
         </rollingPolicy>
         <!-- 只输出 ERROR 及以上（WARN 单独处理，避免混淆） -->
@@ -84,7 +84,7 @@
                 <maxFileSize>50MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
             <maxHistory>15</maxHistory>
-            <totalSizeCap>5GB</totalSizeCap>
+            <totalSizeCap>512MB</totalSizeCap>
             <cleanHistoryOnStart>true</cleanHistoryOnStart>
         </rollingPolicy>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
