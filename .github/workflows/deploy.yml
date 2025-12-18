@@ -4,8 +4,15 @@ name: Group Buy Platform CI (Build Stage)
 on:
   push:
     branches: [ "main" ]  # 监听 main 分支的代码推送
+    # 只在以下路径的文件变更时触发（排除文档）
+      # 仅以下文件/目录变更时触发工作流（其他文件变更不触发）
+    paths-ignore: # 黑名单：以下文件/目录变更时，不触发工作流
+      - 'README.md'           # 排除 README 文档
+      - 'docs/**'             # 排除 docs 目录下所有文件（文档）
+      - '.github/**'          # 排除工作流配置（.github/workflows/等）
   pull_request:
     branches: [ "main" ] # 监听 main 或 master 分支的 PR 请求
+
 
 jobs:
   # ======================================================
