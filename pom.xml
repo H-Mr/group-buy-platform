@@ -20,7 +20,7 @@
     <repository>
       <id>nexus-aliyun</id>
       <name>nexus-aliyun</name>
-      <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+      <url>https://maven.aliyun.com/repository/public</url>
       <releases>
         <enabled>true</enabled>
       </releases>
@@ -168,6 +168,8 @@
       <groupId>hjw.dev</groupId>
       <artifactId>DAGFlow</artifactId>
       <version>0.0.1</version>
+      <scope>system</scope> <!-- 核心：不走远程解析，直接读本地文件 -->
+      <systemPath>${project.basedir}/lib/DAGFlow-0.0.1.jar</systemPath> <!-- 本地 JAR 路径 -->
     </dependency>
 
     <dependency>
@@ -258,23 +260,23 @@ versions-maven-plugin：版本管理的 “效率工具”（可选但推荐）
       </plugin>
 
       <plugin>
-<!--        自动安装本地 lib 里的 DAGFlow.jar 到 Maven 仓库-->
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-install-plugin</artifactId>
-        <version>3.1.1</version>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.4.1</version>
         <executions>
           <execution>
-            <id>install-local-dagflow</id>
-            <phase>initialize</phase>  <!-- 构建初始化时执行 -->
+            <phase>package</phase>
             <goals>
-              <goal>install-file</goal>  <!-- 安装本地jar到maven仓库 -->
+              <goal>shade</goal>
             </goals>
             <configuration>
-              <file>${project.basedir}/lib/DAGFlow-0.0.1.jar</file>  <!-- 本地jar路径 -->
-              <groupId>hjw.dev</groupId>
-              <artifactId>DAGFlow</artifactId>
-              <version>0.0.1</version>
-              <packaging>jar</packaging>
+              <!-- 把本地 system 依赖打入 JAR -->
+              <artifactSet>
+                <includes>
+                  <include>hjw.dev:DAGFlow</include>
+                </includes>
+              </artifactSet>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
             </configuration>
           </execution>
         </executions>
