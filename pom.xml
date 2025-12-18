@@ -102,11 +102,6 @@
       <artifactId>xstream</artifactId>
       <version>1.4.10</version>
     </dependency>
-    <dependency>
-      <groupId>io.jsonwebtoken</groupId>
-      <artifactId>jjwt</artifactId>
-      <version>0.9.1</version>
-    </dependency>
 
     <dependency>
       <groupId>com.auth0</groupId>
@@ -255,31 +250,6 @@ versions-maven-plugin：版本管理的 “效率工具”（可选但推荐）
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
         <version>2.16.0</version>
-
-
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.4.1</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <!-- 把本地 system 依赖打入 JAR -->
-              <artifactSet>
-                <includes>
-                  <include>hjw.dev:DAGFlow</include>
-                </includes>
-              </artifactSet>
-              <createDependencyReducedPom>false</createDependencyReducedPom>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
 
 
@@ -320,6 +290,7 @@ repackage 虽然默认绑定到 package 阶段，但显式配置 <executions> �
         </executions>
         <configuration>
           <mainClass>cn.hjw.dev.platform.groupBuyPlatformApplication</mainClass>
+          <includeSystemScope>true</includeSystemScope>
         </configuration>
       </plugin>
 
