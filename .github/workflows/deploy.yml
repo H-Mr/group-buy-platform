@@ -174,7 +174,7 @@ jobs:
             apt update && apt install -y docker.io docker-compose
             systemctl start docker && systemctl enable docker
             fi
-            cd /opt/group-buy
+            cd /opt/group-buy-platform
             # 5.1 配置文件归位
             mkdir -p config
             # 刚才 SCP 把 application-prod.yml 传到了根目录，移进去

@@ -1,5 +1,5 @@
 server:
-  port: ${SERVER_PORT} # 容器内部端口
+  port: ${APP_PORT} # 容器内部端口
 
 # 线程池配置
 thread:
@@ -49,7 +49,7 @@ spring:
   datasource:
     username: root
     password: 123456
-    url: jdbc:mysql:/${SERVER_HOST}:13306/${MYSQL_DATABASE}?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&useSSL=true
+    url: jdbc:mysql://${SERVER_HOST}:13306/${MYSQL_DATABASE}?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&useSSL=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       pool-name: Retail_HikariCP
@@ -73,7 +73,7 @@ mybatis:
 redis:
   sdk:
     config:
-      host: 111.228.51.8
+      host: ${SERVER_HOST}
       port: 16379
       pool-size: 10
       min-idle-size: 5
