@@ -75,5 +75,5 @@
 ![Auth Sequence Diagram](docs/images/auth.png "Auth Sequence Diagram")
 
 ---
-### 4.3 微信公众号扫码登录 + 7天免登录 (WeChat OAuth2 + JWT)
+### 下单，锁单，支付，结算
 
