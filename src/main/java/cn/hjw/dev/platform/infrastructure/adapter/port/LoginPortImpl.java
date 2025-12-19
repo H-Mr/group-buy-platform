@@ -45,7 +45,8 @@ public class LoginPortImpl implements ILoginPort {
     public String createQrCodeTicket() throws IOException {
         // 1. 获取 accessToken
         String accessToken = redisService.getValue(IWeixinApiGateway.WEIXIN_ACCESS_TOKEN);
-        if (null == accessToken) {
+        log.info("==========从缓存获取的 weixin accessToken：{}=====================", accessToken);
+        if (StringUtils.isBlank(accessToken)) {
             // 重新请求获取 accessToken
             Call<WeixinTokenResponseDTO> call = weixinApiGateway.getToken("client_credential", appid, appSecret);
             WeixinTokenResponseDTO weixinTokenRes = call.execute().body();
@@ -54,7 +55,7 @@ public class LoginPortImpl implements ILoginPort {
             // 缓存 accessToken，提前180秒过期，避免临界点问题
             redisService.setValue(IWeixinApiGateway.WEIXIN_ACCESS_TOKEN, accessToken, (weixinTokenRes.getExpires_in()*1000L) - 180000L);
         }
-
+        log.info("==========最终使用的 weixin accessToken：{}=====================", accessToken);
         // 2. 构造请求，创建登录二维码 ticket
         WeixinQrCodeRequestDTO weixinQrCodeReq = WeixinQrCodeRequestDTO.builder()
                 .action_name(WeixinQrCodeRequestDTO.ActionNameTypeVO.QR_SCENE.getCode()) // 临时二维码
@@ -68,6 +69,7 @@ public class LoginPortImpl implements ILoginPort {
         // 3. 请求获取 ticket
         Call<WeixinQrCodeResponseDTO> call = weixinApiGateway.createQrCode(accessToken, weixinQrCodeReq);
         WeixinQrCodeResponseDTO weixinQrCodeRes = call.execute().body();
+        log.info("获取微信登录二维码 ticket 响应：{}", weixinQrCodeRes);
         assert null != weixinQrCodeRes;
         return weixinQrCodeRes.getTicket();
     }

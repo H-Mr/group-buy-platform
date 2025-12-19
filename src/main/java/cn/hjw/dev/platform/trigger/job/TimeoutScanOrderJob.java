@@ -30,7 +30,7 @@ public class TimeoutScanOrderJob {
     @Resource
     private AlipayRequestGateway alipayRequestGateway; // 查询订单支付状态
 
-    @Scheduled(cron = "* 0/5 * * * ?") // 每5分钟执行一次
+    @Scheduled(cron = "0 0/5 * * * ?") // 每5分钟执行一次，在每 5 分钟的 “第 0 秒” 执行一次任务
     public void exec() {
         // 定时查询超过15分钟未支付的订单，发布事件
         log.info("任务；超时15分钟订单关闭");

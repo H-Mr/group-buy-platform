@@ -14,4 +14,8 @@ public class WeixinQrCodeResponseDTO {
     private Long expire_seconds; // 该二维码有效时间，以秒为单位。 最大不超过2592000（即30天）。
     private String url; // 二维码图片解析后的地址，开发者可根据该地址自行生成需要的二维码图片
 
+    // 失败响应字段（微信接口异常时返回）
+    private Integer errcode; // 错误码
+    private String errmsg;   // 错误信息
+
 }
