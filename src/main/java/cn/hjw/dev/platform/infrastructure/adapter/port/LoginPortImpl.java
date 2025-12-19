@@ -48,8 +48,11 @@ public class LoginPortImpl implements ILoginPort {
         log.info("==========从缓存获取的 weixin accessToken：{}=====================", accessToken);
         if (StringUtils.isBlank(accessToken)) {
             // 重新请求获取 accessToken
+            log.info("==========缓存中无有效 weixin accessToken，重新请求获取=====================");
+            log.info("请求获取 weixin accessToken， appid：{}， appSecret：{}", appid, appSecret);
             Call<WeixinTokenResponseDTO> call = weixinApiGateway.getToken("client_credential", appid, appSecret);
             WeixinTokenResponseDTO weixinTokenRes = call.execute().body();
+            log.info("获取 weixin accessToken 响应：{}", weixinTokenRes);
             assert weixinTokenRes != null;
             accessToken = weixinTokenRes.getAccess_token();
             // 缓存 accessToken，提前180秒过期，避免临界点问题

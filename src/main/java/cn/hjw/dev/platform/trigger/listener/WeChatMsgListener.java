@@ -9,6 +9,7 @@ import cn.hjw.dev.platform.types.event.BaseEventType;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import retrofit2.Call;
@@ -68,7 +69,7 @@ public class WeChatMsgListener {
     private void sendLoginTemplate(String openid) throws IOException {
         // 1. 获取 accessToken 【实际业务场景，按需处理下异常】
         String accessToken = redisService.getValue(IWeixinApiGateway.WEIXIN_ACCESS_TOKEN);
-        if (null == accessToken){
+        if (StringUtils.isBlank(accessToken)){
             // 重新请求获取 accessToken
             Call<WeixinTokenResponseDTO> call = weixinApiGateway.getToken("client_credential", appid, appSecret);
             WeixinTokenResponseDTO weixinTokenRes = call.execute().body();
