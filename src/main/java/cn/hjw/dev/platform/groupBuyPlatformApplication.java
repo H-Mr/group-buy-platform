@@ -3,7 +3,6 @@ package cn.hjw.dev.platform;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -14,16 +13,20 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling //开启定时任务
 public class groupBuyPlatformApplication {
     public static void main(String[] args) {
-        // 1. 先启动Spring上下文（获取环境变量），再判断是否加载dotenv
-        SpringApplication app = new SpringApplication(groupBuyPlatformApplication.class);
-        Environment env = app.run(args).getEnvironment();
 
-        // 2. 仅dev环境加载dotenv（prod环境完全不碰dotenv类）
-        String activeEnv = env.getProperty("spring.profiles.active", "dev");
+        // 1. 先判断环境，提前加载.env（仅dev环境）
+        // 先通过临时方式获取激活的环境（不启动Spring上下文）
+        String activeEnv = System.getProperty("spring.profiles.active", "dev");
         if ("dev".equals(activeEnv)) {
             // 把dotenv加载逻辑抽成独立方法，避免prod环境加载该类
             loadDevEnv();
         }
+
+        // 2. 再启动Spring应用（此时配置文件解析时已能读到变量）
+        SpringApplication.run(groupBuyPlatformApplication.class, args);
+
+
+
     }
 
     // 该方法仅dev环境调用，prod环境不会执行，避免加载Dotenv类

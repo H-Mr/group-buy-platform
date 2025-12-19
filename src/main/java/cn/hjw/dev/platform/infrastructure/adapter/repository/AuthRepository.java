@@ -4,6 +4,7 @@ import cn.hjw.dev.platform.api.dto.AuthTokenResponseDTO;
 import cn.hjw.dev.platform.domain.auth.adapter.repository.IAuthRepository;
 import cn.hjw.dev.platform.infrastructure.dao.IUserDao;
 import cn.hjw.dev.platform.infrastructure.dao.po.User;
+import cn.hjw.dev.platform.infrastructure.dcc.DynamicConfigCenter;
 import cn.hjw.dev.platform.infrastructure.gateway.IWeixinApiGateway;
 import cn.hjw.dev.platform.infrastructure.redis.IRedisService;
 import cn.hjw.dev.platform.types.enums.ResponseCode;
@@ -31,6 +32,9 @@ public class AuthRepository  implements IAuthRepository {
 
     @Resource
     private JwtUtils jwtUtils; // Jwt 工具类 生成登录用户的token
+
+    @Resource
+    private DynamicConfigCenter dynamicConfigCenter; // 1. 注入动态配置中心
 
     private static final String REFRESH_TOKEN_PREFIX = "auth:refresh:";
     private static final long REFRESH_EXPIRE_DAYS = 7;
@@ -84,33 +88,41 @@ public class AuthRepository  implements IAuthRepository {
         if (StringUtils.isBlank(userId)) {
             throw new AppException(ResponseCode.NO_LOGIN.getCode(), "Refresh Token 已过期或无效，请重新登录");
         }
-        // 2. 核心：只要还能刷，就重置 Refresh Token 的过期时间 (7天)
-        // 这样只要用户 7 天内有一步操作触发了刷新，他就永远不用重新扫码
-        redisService.setValue(redisKey, userId, REFRESH_EXPIRE_DAYS * 24 * 60 * 60 *1000L);
-        // 3. 生成新的 Access Token
-        String newAccessToken = jwtUtils.generateToken(userId, "");
+        // 用动态配置获取过期时间 ，这样只要用户 expireMillis 内有一步操作触发了刷新，他就永远不用重新扫码
+        long expireMillis = dynamicConfigCenter.getRefreshTokenExpireMillis();
+        redisService.setValue(redisKey, userId, expireMillis);
+
+        // 生成新的 Access Token (使用动态配置)
+        long accessTokenExpireMillis = dynamicConfigCenter.getAccessTokenExpireMillis();
+        String newAccessToken = jwtUtils.generateToken(userId, "", accessTokenExpireMillis);
 
         return AuthTokenResponseDTO.builder()
                 .accessToken(newAccessToken)
                 .refreshToken(refreshToken) // RefreshToken 保持不变，但 Redis 中 TTL 已延长
-                .expiresIn(jwtUtils.getExpire())
+                .expiresIn(accessTokenExpireMillis / 1000L)
                 .build();
     }
 
     private AuthTokenResponseDTO createTokenPair(String userId, String openid) {
-        // 1. 生成 Access Token (JWT)
-        String accessToken = jwtUtils.generateToken(userId, openid);
 
-        // 2. 生成 Refresh Token (UUID)
+        // 1. 获取动态配置的 AccessToken，Refresh Token  过期时间 (毫秒)
+        long accessTokenExpireMillis = dynamicConfigCenter.getAccessTokenExpireMillis();
+        long expireMillis = dynamicConfigCenter.getRefreshTokenExpireMillis();
+
+        // 1. 生成 Access Token (JWT)
+        String accessToken = jwtUtils.generateToken(userId, openid,accessTokenExpireMillis);
+
+
+        // 3. 生成 Refresh Token (UUID)
         String refreshToken = UUID.randomUUID().toString().replace("-", "");
 
-        // 3. 存储 Refresh Token 到 Redis，有效期 7 天
-        redisService.setValue(REFRESH_TOKEN_PREFIX + refreshToken, userId, REFRESH_EXPIRE_DAYS * 24 * 60 * 60);
+        // 4. 存储 Refresh Token 到 Redis，有效期 expireMillis
+        redisService.setValue(REFRESH_TOKEN_PREFIX + refreshToken, userId, expireMillis);
 
         return AuthTokenResponseDTO.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .expiresIn(jwtUtils.getExpire())
+                .expiresIn(accessTokenExpireMillis / 1000L) // 返回给前端的过期时间也应该是动态的(秒)
                 .build();
     }
 }

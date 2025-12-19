@@ -180,7 +180,7 @@
       <artifactId>java-dotenv</artifactId>
       <version>5.2.2</version>
         <!-- provided：编译时可用，打包时默认不包含 -->
-        <scope>provided</scope>
+      <scope>provided</scope>
     </dependency>
 
 <!--
@@ -268,12 +268,12 @@
         <configuration>
           <encoding>${project.build.sourceEncoding}</encoding>
           <!-- 可选但推荐：强制使用JAVA_HOME指定的JDK编译，避免环境冲突 -->
-          <source>${maven.compiler.source}</source>
-          <target>${maven.compiler.target}</target>
-<!--          <source>8</source>-->
-<!--          <target>8</target>-->
-<!--          <fork>true</fork>-->
-<!--          <executable>D:\JAVA\jdk8u462-b08\jdk8u462-b08\bin\javac</executable>-->
+<!--          <source>${maven.compiler.source}</source>-->
+<!--          <target>${maven.compiler.target}</target>-->
+          <source>8</source>
+          <target>8</target>
+          <fork>true</fork>
+          <executable>D:\JAVA\jdk8u462-b08\jdk8u462-b08\bin\javac</executable>
         </configuration>
       </plugin>
 <!--      -->

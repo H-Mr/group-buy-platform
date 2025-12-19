@@ -18,4 +18,9 @@
         where tag_id = #{tagId}
     </update>
 
+    <select id="queryCrowdTagsList" resultMap="dataMap">
+        select id, tag_id, tag_name, tag_desc, statistics, create_time, update_time
+        from crowd_tags
+        order by id desc
+    </select>
 </mapper>

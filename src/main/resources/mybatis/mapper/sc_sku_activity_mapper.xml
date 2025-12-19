@@ -40,4 +40,10 @@
           and goods_id = #{goodsId}
     </update>
 
+    <select id="querySCSkuActivityList" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/>
+        from sc_sku_activity
+        order by id desc
+    </select>
+
 </mapper>

@@ -28,8 +28,8 @@ public class LoginInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        // 1. 获取 Token，通常放在 Header 的 Authorization 字段，或者自定义字段如 "token"
-        // 这里假设前端传参 header: { "Authorization": "token_string" }
+        // 获取 Token，通常放在 Header 的 Authorization 字段
+        // 前端传参 header: { "Authorization": "Bearer token_string" }
         String token = request.getHeader("Authorization");
 
         // 兼容处理：如果 header 没拿不到，也可以尝试从参数获取（可选）
@@ -39,7 +39,22 @@ public class LoginInterceptor implements HandlerInterceptor {
 
         if (StringUtils.isBlank(token)) {
             // 抛出异常，由全局异常处理器捕获返回 NO_LOGIN 错误码
-            throw new AppException(ResponseCode.NO_LOGIN.getCode(), ResponseCode.NO_LOGIN.getInfo());
+            throw new AppException(ResponseCode.NO_LOGIN.getCode(), "未提供登录Token，格式为 Bearer xxxx");
+        }
+        // 逻辑：如果 Token 匹配 DCC 管理密钥，且请求路径是 DCC 相关接口，则直接放行
+        String dccSecret = dynamicConfigCenter.getDccAdminSecret();
+        if (StringUtils.isNotBlank(dccSecret) && dccSecret.equals(token)) {
+            String requestURI = request.getRequestURI();
+            // 严格限制：只有访问 /api/v1/gbm/dcc/ 下的接口才允许通过
+            if (requestURI.contains("/api/v1/gbm/dcc/")) {
+                log.info("DCC管理密钥访问，路径: {}", requestURI);
+                return true; // 直接放行，跳过后续所有校验
+            } else {
+                // 如果拿着 DCC 密钥去访问下单接口，视为非法，拒绝或让其走后续 JWT 校验（自然会失败）
+                log.warn("警告：尝试使用 DCC 密钥访问非 DCC 接口: {}", requestURI);
+                // 这里选择不 return true，让代码继续往下走。
+                // 因为这个 token 不是有效的 JWT，下面解析时会报错从而拦截，达到"只能访问DCC"的目的。
+            }
         }
 
         // 1. 判断开关是否开启
@@ -53,7 +68,6 @@ public class LoginInterceptor implements HandlerInterceptor {
                 return true;
             }
         }
-        // ================= 核心修改结束 =================
         // ================= 核心修改结束 =================
 
         try {
