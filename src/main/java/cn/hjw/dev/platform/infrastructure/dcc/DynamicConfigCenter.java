@@ -26,32 +26,32 @@ public class DynamicConfigCenter {
     // 3. 黑名单 (列表类型)
     @Getter
     @DCCValue(value = "scBlacklist:s02c02,s03c03", description = "渠道黑名单 (逗号分隔)")
-    private volatile String scBlacklist = "s02c02,s03c03";
+    private volatile String scBlacklist;
 
     // 体验 Token 开关及配置 (新增)
     @Getter
     @DCCValue(value = "demoTokenSwitch:0", description = "演示Token开关 (0-关闭 1-开启)")
-    private volatile String demoTokenSwitch = "0";
+    private volatile String demoTokenSwitch;
 
     @Getter
     @DCCValue(value = "demoTokenSecret:Bearer experience-token-vip-888", description = "演示专用Token串")
-    private volatile String demoTokenSecret = "experience-token-vip-888";
+    private volatile String demoTokenSecret;
 
     @Getter
     @DCCValue(value = "demoUserId:7736117232733921470425906184967298691211750310624021055982293696", description = "演示用户ID，可以自定义表示不同用户")
-    private volatile String demoUserId = "7736117232733921470425906184967298691211750310624021055982293696";
+    private volatile String demoUserId;
 
     // 新增：Token 过期时间控制
     // 格式：accessToken过期时间(秒),refreshToken过期时间(秒)
     // 默认值：1800(30分钟), 604800(7天)
     @Getter
-    @DCCValue(value = "tokenExpireConfig:1800,604800", description = "Token过期时间(秒): access,refresh")
-    private volatile String tokenExpireConfig = "1800,604800";
+    @DCCValue(value = "tokenExpireConfig:1800 604800", description = "Token过期时间(秒): access,refresh")
+    private volatile String tokenExpireConfig;
 
     // 新增：DCC 接口专用访问密钥
     @Getter
     @DCCValue(value = "dccAdminSecret:Bearer dcc-admin-key", description = "DCC接口专用管理密钥")
-    private volatile String dccAdminSecret = "Bearer dcc-admin-key";
+    private volatile String dccAdminSecret;
 
     public boolean isDemoTokenOpen() {
         return "1".equals(demoTokenSwitch);
@@ -84,7 +84,7 @@ public class DynamicConfigCenter {
      */
     public long getRefreshTokenExpireMillis() {
         try {
-            String[] splits = tokenExpireConfig.split(",");
+            String[] splits = tokenExpireConfig.split(" ");
             if (splits.length == 2) {
                 return Long.parseLong(splits[1]) * 1000L;
             }
@@ -97,7 +97,7 @@ public class DynamicConfigCenter {
     // 使用此方法获取 AccessToken 时间
     public long getAccessTokenExpireMillis() {
         try {
-            String[] splits = tokenExpireConfig.split(",");
+            String[] splits = tokenExpireConfig.split(" ");
             if (splits.length > 0) {
                 return Long.parseLong(splits[0]) * 1000L;
             }
