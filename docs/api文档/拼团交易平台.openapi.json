@@ -1,0 +1,2412 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "拼团交易平台",
+    "description": "",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "动态配置控制器"
+    },
+    {
+      "name": "登录控制器"
+    },
+    {
+      "name": "用户下单（token）"
+    },
+    {
+      "name": "营销查询服务"
+    },
+    {
+      "name": "扩展使用"
+    },
+    {
+      "name": "微信门户控制器"
+    },
+    {
+      "name": "SKU 管理控制器"
+    },
+    {
+      "name": "拼团活动管理控制器"
+    },
+    {
+      "name": "折扣管理控制器"
+    },
+    {
+      "name": "SKU-活动 管理控制器"
+    }
+  ],
+  "paths": {
+    "/api/v1/gbm/dcc/update_config": {
+      "get": {
+        "summary": "动态更新配置接口",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "动态配置控制器"
+        ],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "example": "tokenExpireConfig",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "value",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "example": "600 1200",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "example": "Bearer dcc-admin-key",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseBoolean"
+                },
+                "example": {
+                  "code": "",
+                  "info": "",
+                  "data": false
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/gbm/dcc/query_configs": {
+      "get": {
+        "summary": "查询所有配置接口",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "动态配置控制器"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "example": "Bearer dcc-admin-key",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseMapDccMetaInfo"
+                },
+                "example": {
+                  "code": "",
+                  "info": "",
+                  "data": {
+                    "": {
+                      "key": "",
+                      "currentValue": "",
+                      "description": ""
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/login/weixin_qrcode": {
+      "get": {
+        "summary": "获取登录二维码",
+        "deprecated": false,
+        "description": "返回的是Base64图片，可用复制data字段在浏览器打开查看",
+        "tags": [
+          "登录控制器"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseWeixinQrCodeResponseDTO",
+                  "description": ""
+                },
+                "example": {
+                  "code": "",
+                  "info": "",
+                  "data": {
+                    "ticket": "",
+                    "tokenImage": ""
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/login/check_login": {
+      "get": {
+        "summary": "轮询扫码结果",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "登录控制器"
+        ],
+        "parameters": [
+          {
+            "name": "ticket",
+            "in": "query",
+            "description": "登录票据",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseAuthTokenResponseDTO"
+                },
+                "example": {
+                  "code": "",
+                  "info": "",
+                  "data": {
+                    "accessToken": "",
+                    "refreshToken": "",
+                    "expiresIn": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/login/refresh_token": {
+      "get": {
+        "summary": "刷新 Token 接口",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "登录控制器"
+        ],
+        "parameters": [
+          {
+            "name": "refreshToken",
+            "in": "query",
+            "description": "刷新令牌\n 前端拦截器发现 401 后，携带 refreshToken 调用此接口",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseAuthTokenResponseDTO"
+                },
+                "example": {
+                  "code": "",
+                  "info": "",
+                  "data": {
+                    "accessToken": "",
+                    "refreshToken": "",
+                    "expiresIn": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/alipay/create_pay_order": {
+      "post": {
+        "summary": "商品下单",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "用户下单（token）"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "example": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJvcGVuaWQiOiJvTDJUWjJBd1FfWVpwcW5QOHJOVE1LX2FvOTZBIiwidXNlcklkIjoiNzczNjExNzIzMjczMzkyMTQ3MDQyNTkwNjE4NDk2NzI5ODY5MTIxMTc1MDMxMDYyNDAyMTA1NTk4MjI5MzY5NiIsInN1YiI6Ijc3MzYxMTcyMzI3MzM5MjE0NzA0MjU5MDYxODQ5NjcyOTg2OTEyMTE3NTAzMTA2MjQwMjEwNTU5ODIyOTM2OTYiLCJpYXQiOjE3NjYyMzkxODcsImV4cCI6MTc2NjI0MDk4N30.dF0xtXeOfHrRyQvO9v0GLW6eQOQFcP3NN3EKIpRwzBk",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePayRequestDTO",
+                "description": ""
+              },
+              "example": {
+                "productId": "9890001",
+                "activityId": 100123,
+                "source": "s01",
+                "channel": "c01"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseString",
+                  "description": "返回订单的支付地址"
+                },
+                "example": {
+                  "code": "",
+                  "info": "",
+                  "data": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/alipay/alipay_notify_url": {
+      "post": {
+        "summary": "支付宝回调接口",
+        "deprecated": false,
+        "description": "支付宝支付结果回调接口，收到回调后发布订单支付成功事件",
+        "tags": [
+          "用户下单（token）"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "description": ""
+                },
+                "example": ""
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/query/sse/subscribe": {
+      "get": {
+        "summary": "SSE 接收拼团结果通知",
+        "deprecated": false,
+        "description": "SSE 是“监听通道”，下单是“业务动作”，两者必须分开，通常是先监听，后下单（防止下单太快，还没连上SSE就拼团成功了导致漏接消息）。\n前端调用: const es = new EventSource(\"/api/v1/query/sse/subscribe?token=\" + your_jwt_token);",
+        "tags": [
+          "营销查询服务"
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "example": "Bearer experience-token-vip-888",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/SseEmitter",
+                  "description": "org.springframework.web.servlet.mvc.method.annotation.SseEmitter"
+                },
+                "example": "{\n  \"timeout\": 0,\n  \"handler\": {},\n  \"earlySendAttempts\": [\n    {\n      \"data\": {},\n      \"mediaType\": {\n        \"type\": \"\",\n        \"subtype\": \"\",\n        \"parameters\": {\n          \"\": \"\"\n        },\n        \"toStringValue\": \"\"\n      }\n    }\n  ],\n  \"complete\": false,\n  \"failure\": {\n    \"detailMessage\": \"\",\n    \"cause\": {\n      \"detailMessage\": \"\",\n      \"cause\": {},\n      \"stackTrace\": [\n        {\n          \"declaringClass\": \"\",\n          \"methodName\": \"\",\n          \"fileName\": \"\",\n          \"lineNumber\": 0\n        }\n      ],\n      \"suppressedExceptions\": [\n        {}\n      ]\n    },\n    \"stackTrace\": [\n      {\n        \"declaringClass\": \"\",\n        \"methodName\": \"\",\n        \"fileName\": \"\",\n        \"lineNumber\": 0\n      }\n    ],\n    \"suppressedExceptions\": [\n      {\n        \"detailMessage\": \"\",\n        \"cause\": {},\n        \"stackTrace\": [\n          {\n            \"declaringClass\": \"\",\n            \"methodName\": \"\",\n            \"fileName\": \"\",\n            \"lineNumber\": 0\n          }\n        ],\n        \"suppressedExceptions\": [\n          {}\n        ]\n      }\n    ]\n  },\n  \"sendFailed\": false,\n  \"timeoutCallback\": {\n    \"delegate\": {}\n  },\n  \"errorCallback\": {},\n  \"completionCallback\": {\n    \"delegate\": {}\n  }\n}"
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/query/query_sku_list": {
+      "get": {
+        "summary": "查询所有商品列表",
+        "deprecated": false,
+        "description": "对应需求：浏览sku也不需要token",
+        "tags": [
+          "营销查询服务"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseListSku"
+                },
+                "example": {
+                  "code": "",
+                  "info": "",
+                  "data": [
+                    {
+                      "id": 0,
+                      "source": "",
+                      "channel": "",
+                      "goodsId": "",
+                      "goodsName": "",
+                      "originalPrice": 0,
+                      "createTime": "",
+                      "updateTime": ""
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/query/query_activity_list": {
+      "get": {
+        "summary": "查询活动列表",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "营销查询服务"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseListGroupBuyActivity"
+                },
+                "example": {
+                  "code": "",
+                  "info": "",
+                  "data": [
+                    {
+                      "id": 0,
+                      "activityId": 0,
+                      "activityName": "",
+                      "discountId": "",
+                      "groupType": 0,
+                      "takeLimitCount": 0,
+                      "target": 0,
+                      "validTime": 0,
+                      "status": 0,
+                      "startTime": "",
+                      "endTime": "",
+                      "tagId": "",
+                      "tagScope": "",
+                      "createTime": "",
+                      "updateTime": ""
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/gbm/trade/lock_market_pay_order": {
+      "post": {
+        "summary": "通过HTTP调用锁单",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "扩展使用"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LockMarketPayOrderRequestDTO",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseLockMarketPayOrderResponseDTO",
+                  "description": ""
+                },
+                "example": {
+                  "code": "",
+                  "info": "",
+                  "data": {
+                    "orderId": "",
+                    "originalPrice": 0,
+                    "deductionPrice": 0,
+                    "payPrice": 0,
+                    "tradeOrderStatus": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/gbm/trade/settlement_market_pay_order": {
+      "post": {
+        "summary": "通过HTTP调用结算",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "扩展使用"
+        ],
+        "parameters": [
+          {
+            "name": "source",
+            "in": "query",
+            "description": "渠道",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channel",
+            "in": "query",
+            "description": "来源",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "用户ID",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "outTradeNo",
+            "in": "query",
+            "description": "外部交易单号",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "outTradeTime",
+            "in": "query",
+            "description": "外部交易时间",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseSettlementMarketPayOrderResponseDTO"
+                },
+                "example": {
+                  "code": "",
+                  "info": "",
+                  "data": {
+                    "userId": "",
+                    "teamId": "",
+                    "activityId": 0,
+                    "outTradeNo": ""
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/test/group_buy_notify": {
+      "post": {
+        "summary": "模拟HTTP回调",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "扩展使用"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotifyRequestDTO",
+                "description": "通知回调参数"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "description": "success 成功，error 失败"
+                },
+                "example": ""
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/weixin/portal/receive": {
+      "get": {
+        "summary": "微信公众号接入验证",
+        "deprecated": false,
+        "description": "微信服务器向开发者配置的 URL 发起 GET 请求，验证该 URL 是否为开发者所有，是公众号对接的 “准入验证”。\n只有验签通过，后续的消息推送（POST）才会生效。",
+        "tags": [
+          "微信门户控制器"
+        ],
+        "parameters": [
+          {
+            "name": "signature",
+            "in": "query",
+            "description": "微信加密签名，signature结合了开发者填写的token参数和请求中的timestamp参数、nonce参数。",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "timestamp",
+            "in": "query",
+            "description": "时间戳",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "nonce",
+            "in": "query",
+            "description": "随机数",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "echostr",
+            "in": "query",
+            "description": "随机字符串（验签成功后需原样返回，微信服务器以此确认验证通过）",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "description": "echostr参数内容\n 服务器侧：\n 微信和开发者约定一个token（公众号后台配置），验签时按以下步骤：\n 1. 将token、timestamp、nonce三个参数进行字典序排序\n 2. 将三个参数字符串拼接成一个字符串进行sha1加密\n 3. 开发者获得加密后的字符串可与signature对比，标识该请求来源于微信\n 对比加密结果与signature，一致则验签成功。\n -------------------------------------------------\n 微信侧：\n 若开发者服务器返回的echostr与微信发送的一致 → 验证通过，公众号后台配置生效；\n 若返回null/ 空 / 错误值 → 验证失败，配置无法保存。"
+                },
+                "example": ""
+              }
+            }
+          }
+        },
+        "security": []
+      },
+      "post": {
+        "summary": "接收微信公众号消息",
+        "deprecated": false,
+        "description": "微信服务器将用户发送的消息转发给开发者服务器，开发者处理后响应特定格式的数据包给微信服务器，\n微信服务器再将响应内容转发给用户。",
+        "tags": [
+          "微信门户控制器"
+        ],
+        "parameters": [
+          {
+            "name": "signature",
+            "in": "query",
+            "description": "微信加密签名，signature结合了开发者填写的token参数和请求中的timestamp参数、nonce参数。",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "timestamp",
+            "in": "query",
+            "description": "时间戳",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "nonce",
+            "in": "query",
+            "description": "随机数",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "openid",
+            "in": "query",
+            "description": "用户标识",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "encrypt_type",
+            "in": "query",
+            "description": "加密类型（明文：raw；加密：aes）",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "msg_signature",
+            "in": "query",
+            "description": "消息体签名（加密消息才有）",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "description": "消息体（XML格式）"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "description": "响应给微信服务器的消息体（XML格式）"
+                },
+                "example": ""
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/admin/sku/list": {
+      "get": {
+        "summary": "查询商品列表",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "SKU 管理控制器"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "example": "Bearer experience-token-vip-888",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseListSku"
+                },
+                "example": {
+                  "code": "",
+                  "info": "",
+                  "data": [
+                    {
+                      "id": 0,
+                      "source": "",
+                      "channel": "",
+                      "goodsId": "",
+                      "goodsName": "",
+                      "originalPrice": 0,
+                      "createTime": "",
+                      "updateTime": ""
+                    }
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/admin/sku/create": {
+      "post": {
+        "summary": "创建商品 (自动初始化库存)",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "SKU 管理控制器"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkuCreateRequestDTO",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseString"
+                },
+                "example": {
+                  "code": "",
+                  "info": "",
+                  "data": ""
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/admin/sku/update": {
+      "post": {
+        "summary": "更新商品信息",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "SKU 管理控制器"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkuUpdateRequestDTO",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseBoolean"
+                },
+                "example": {
+                  "code": "",
+                  "info": "",
+                  "data": false
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/admin/sku/add_stock": {
+      "post": {
+        "summary": "增加库存",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "SKU 管理控制器"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StockAddRequestDTO",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseBoolean"
+                },
+                "example": {
+                  "code": "",
+                  "info": "",
+                  "data": false
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/admin/activity/list": {
+      "get": {
+        "summary": "查询活动列表",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "拼团活动管理控制器"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "example": "Bearer experience-token-vip-888",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseListGroupBuyActivity"
+                },
+                "example": {
+                  "code": "",
+                  "info": "",
+                  "data": [
+                    {
+                      "id": 0,
+                      "activityId": 0,
+                      "activityName": "",
+                      "discountId": "",
+                      "groupType": 0,
+                      "takeLimitCount": 0,
+                      "target": 0,
+                      "validTime": 0,
+                      "status": 0,
+                      "startTime": "",
+                      "endTime": "",
+                      "tagId": "",
+                      "tagScope": "",
+                      "createTime": "",
+                      "updateTime": ""
+                    }
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/admin/activity/query_tag_list": {
+      "get": {
+        "summary": "查询人群标签列表 (创建活动/折扣时的辅助接口)",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "拼团活动管理控制器"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseListCrowdTags"
+                },
+                "example": {
+                  "code": "",
+                  "info": "",
+                  "data": [
+                    {
+                      "id": 0,
+                      "tagId": "",
+                      "tagName": "",
+                      "tagDesc": "",
+                      "statistics": 0,
+                      "createTime": "",
+                      "updateTime": ""
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/admin/activity/create": {
+      "post": {
+        "summary": "创建活动",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "拼团活动管理控制器"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActivityCreateRequestDTO",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseLong"
+                },
+                "example": {
+                  "code": "",
+                  "info": "",
+                  "data": 0
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/admin/activity/update": {
+      "post": {
+        "summary": "更新活动配置",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "拼团活动管理控制器"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActivityUpdateRequestDTO",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseBoolean"
+                },
+                "example": {
+                  "code": "",
+                  "info": "",
+                  "data": false
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/admin/discount/list": {
+      "get": {
+        "summary": "查询折扣列表",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "折扣管理控制器"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseListGroupBuyDiscount"
+                },
+                "example": {
+                  "code": "",
+                  "info": "",
+                  "data": [
+                    {
+                      "id": 0,
+                      "discountId": 0,
+                      "discountName": "",
+                      "discountDesc": "",
+                      "discountType": 0,
+                      "marketPlan": "",
+                      "marketExpr": "",
+                      "tagId": "",
+                      "createTime": "",
+                      "updateTime": ""
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/admin/discount/create": {
+      "post": {
+        "summary": "创建折扣",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "折扣管理控制器"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscountCreateRequestDTO",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseLong"
+                },
+                "example": {
+                  "code": "",
+                  "info": "",
+                  "data": 0
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/admin/discount/update": {
+      "post": {
+        "summary": "更新折扣配置",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "折扣管理控制器"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscountUpdateRequestDTO",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseBoolean"
+                },
+                "example": {
+                  "code": "",
+                  "info": "",
+                  "data": false
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/admin/sku_activity/list": {
+      "get": {
+        "summary": "查询 渠道-商品-活动 绑定列表",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "SKU-活动 管理控制器"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "example": "Bearer experience-token-vip-888",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseListSCSkuActivity"
+                },
+                "example": {
+                  "code": "",
+                  "info": "",
+                  "data": [
+                    {
+                      "id": 0,
+                      "source": "",
+                      "channel": "",
+                      "activityId": 0,
+                      "goodsId": "",
+                      "createTime": "",
+                      "updateTime": ""
+                    }
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/admin/sku_activity/bind": {
+      "post": {
+        "summary": "绑定活动与 SKU 关联关系 (核心配置接口)",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "SKU-活动 管理控制器"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SCSkuActivityRequestDTO",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseBoolean"
+                },
+                "example": {
+                  "code": "",
+                  "info": "",
+                  "data": false
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ResponseBoolean": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": ""
+          },
+          "info": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "type": "boolean",
+            "description": ""
+          }
+        }
+      },
+      "LockMarketPayOrderResponseDTO": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "description": "预购订单ID"
+          },
+          "originalPrice": {
+            "type": "number",
+            "description": "原始金额"
+          },
+          "deductionPrice": {
+            "type": "number",
+            "description": "折扣金额"
+          },
+          "payPrice": {
+            "type": "number",
+            "description": "支付金额"
+          },
+          "tradeOrderStatus": {
+            "type": "integer",
+            "description": "交易订单状态"
+          }
+        }
+      },
+      "key": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "配置键"
+          },
+          "currentValue": {
+            "type": "string",
+            "description": "当前值"
+          },
+          "description": {
+            "type": "string",
+            "description": "配置描述"
+          }
+        }
+      },
+      "ResponseLockMarketPayOrderResponseDTO": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": ""
+          },
+          "info": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/LockMarketPayOrderResponseDTO",
+            "description": ""
+          }
+        }
+      },
+      "MapDccMetaInfo": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "$ref": "#/components/schemas/key"
+          }
+        }
+      },
+      "LockMarketPayOrderRequestDTO": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "用户ID"
+          },
+          "teamId": {
+            "type": "string",
+            "description": "拼单组队ID - 可为空，为空则创建新组队ID"
+          },
+          "activityId": {
+            "type": "integer",
+            "description": "活动ID",
+            "format": "int64"
+          },
+          "goodsId": {
+            "type": "string",
+            "description": "商品ID"
+          },
+          "source": {
+            "type": "string",
+            "description": "渠道"
+          },
+          "channel": {
+            "type": "string",
+            "description": "来源"
+          },
+          "outTradeNo": {
+            "type": "string",
+            "description": "外部交易单号"
+          },
+          "notifyUrl": {
+            "type": "string",
+            "description": "回调通知地址"
+          }
+        }
+      },
+      "ResponseMapDccMetaInfo": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": ""
+          },
+          "info": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/MapDccMetaInfo",
+            "description": ""
+          }
+        }
+      },
+      "NotifyRequestDTO": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string",
+            "description": "组队ID"
+          },
+          "outTradeNoList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "外部单号"
+          }
+        }
+      },
+      "ResponseString": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": ""
+          },
+          "info": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "WeixinQrCodeResponseDTO": {
+        "type": "object",
+        "properties": {
+          "ticket": {
+            "type": "string",
+            "description": "微信生成的二维码 Ticket (前端轮询鉴权时需要传回给后端)"
+          },
+          "tokenImage": {
+            "type": "string",
+            "description": "二维码图片的 Base64 字符串 (前端用于展示)"
+          }
+        }
+      },
+      "CreatePayRequestDTO": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "description": "产品编号"
+          },
+          "activityId": {
+            "type": "integer",
+            "description": "活动ID",
+            "format": "int64"
+          },
+          "teamId": {
+            "type": "string",
+            "description": "拼团组队ID，可为空，为空的时，则为用户首次创建拼团"
+          },
+          "source": {
+            "type": "string",
+            "description": "商品来源"
+          },
+          "channel": {
+            "type": "string",
+            "description": "商品渠道"
+          }
+        }
+      },
+      "AuthTokenResponseDTO": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "短效，用于请求"
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "长效，用于刷新"
+          },
+          "expiresIn": {
+            "type": "integer",
+            "description": "accessToken 过期时间",
+            "format": "int64"
+          }
+        }
+      },
+      "ResponseWeixinQrCodeResponseDTO": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": ""
+          },
+          "info": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/WeixinQrCodeResponseDTO",
+            "description": ""
+          }
+        }
+      },
+      "SkuCreateRequestDTO": {
+        "type": "object",
+        "properties": {
+          "goodsName": {
+            "type": "string",
+            "description": ""
+          },
+          "originalPrice": {
+            "type": "number",
+            "description": ""
+          },
+          "source": {
+            "type": "string",
+            "description": ""
+          },
+          "channel": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "ResponseAuthTokenResponseDTO": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": ""
+          },
+          "info": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/AuthTokenResponseDTO",
+            "description": ""
+          }
+        }
+      },
+      "ResponseLong": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": ""
+          },
+          "info": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "type": "integer",
+            "description": "",
+            "format": "int64"
+          }
+        }
+      },
+      "ActivityCreateRequestDTO": {
+        "type": "object",
+        "properties": {
+          "activityName": {
+            "type": "string",
+            "description": ""
+          },
+          "discountId": {
+            "type": "string",
+            "description": "关联的折扣ID（需先创建折扣）"
+          },
+          "groupType": {
+            "type": "integer",
+            "description": ""
+          },
+          "takeLimitCount": {
+            "type": "integer",
+            "description": ""
+          },
+          "target": {
+            "type": "integer",
+            "description": ""
+          },
+          "validTime": {
+            "type": "integer",
+            "description": ""
+          },
+          "status": {
+            "type": "integer",
+            "description": ""
+          },
+          "startTime": {
+            "type": "string",
+            "description": ""
+          },
+          "endTime": {
+            "type": "string",
+            "description": ""
+          },
+          "tagId": {
+            "type": "string",
+            "description": ""
+          },
+          "tagScope": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "SettlementMarketPayOrderResponseDTO": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "用户ID"
+          },
+          "teamId": {
+            "type": "string",
+            "description": "拼单组队ID"
+          },
+          "activityId": {
+            "type": "integer",
+            "description": "活动ID",
+            "format": "int64"
+          },
+          "outTradeNo": {
+            "type": "string",
+            "description": "外部交易单号"
+          }
+        }
+      },
+      "DiscountCreateRequestDTO": {
+        "type": "object",
+        "properties": {
+          "discountName": {
+            "type": "string",
+            "description": ""
+          },
+          "discountDesc": {
+            "type": "string",
+            "description": ""
+          },
+          "discountType": {
+            "type": "integer",
+            "description": ""
+          },
+          "marketPlan": {
+            "type": "string",
+            "description": ""
+          },
+          "marketExpr": {
+            "type": "string",
+            "description": ""
+          },
+          "tagId": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "ResponseSettlementMarketPayOrderResponseDTO": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": ""
+          },
+          "info": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/SettlementMarketPayOrderResponseDTO",
+            "description": ""
+          }
+        }
+      },
+      "SCSkuActivityRequestDTO": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "description": ""
+          },
+          "channel": {
+            "type": "string",
+            "description": ""
+          },
+          "goodsId": {
+            "type": "string",
+            "description": "必须是已存在的 goodsId"
+          },
+          "activityId": {
+            "type": "integer",
+            "description": "必须是已存在的 activityId",
+            "format": "int64"
+          }
+        }
+      },
+      "SkuUpdateRequestDTO": {
+        "type": "object",
+        "properties": {
+          "goodsId": {
+            "type": "string",
+            "description": "必须传，用于定位"
+          },
+          "goodsName": {
+            "type": "string",
+            "description": "可选更新"
+          },
+          "originalPrice": {
+            "type": "number",
+            "description": "可选更新"
+          }
+        }
+      },
+      "StockAddRequestDTO": {
+        "type": "object",
+        "properties": {
+          "goodsId": {
+            "type": "string",
+            "description": ""
+          },
+          "count": {
+            "type": "integer",
+            "description": ""
+          }
+        }
+      },
+      "ActivityUpdateRequestDTO": {
+        "type": "object",
+        "properties": {
+          "activityId": {
+            "type": "integer",
+            "description": "必须传",
+            "format": "int64"
+          },
+          "activityName": {
+            "type": "string",
+            "description": ""
+          },
+          "discountId": {
+            "type": "string",
+            "description": ""
+          },
+          "groupType": {
+            "type": "integer",
+            "description": ""
+          },
+          "takeLimitCount": {
+            "type": "integer",
+            "description": ""
+          },
+          "target": {
+            "type": "integer",
+            "description": ""
+          },
+          "validTime": {
+            "type": "integer",
+            "description": ""
+          },
+          "status": {
+            "type": "integer",
+            "description": ""
+          },
+          "startTime": {
+            "type": "string",
+            "description": ""
+          },
+          "endTime": {
+            "type": "string",
+            "description": ""
+          },
+          "tagId": {
+            "type": "string",
+            "description": ""
+          },
+          "tagScope": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "GroupBuyActivity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "自增",
+            "format": "int64"
+          },
+          "activityId": {
+            "type": "integer",
+            "description": "活动ID",
+            "format": "int64"
+          },
+          "activityName": {
+            "type": "string",
+            "description": "活动名称"
+          },
+          "discountId": {
+            "type": "string",
+            "description": "折扣ID"
+          },
+          "groupType": {
+            "type": "integer",
+            "description": "拼团方式（0自动成团、1达成目标拼团）"
+          },
+          "takeLimitCount": {
+            "type": "integer",
+            "description": "拼团次数限制"
+          },
+          "target": {
+            "type": "integer",
+            "description": "拼团目标"
+          },
+          "validTime": {
+            "type": "integer",
+            "description": "拼团时长（分钟）"
+          },
+          "status": {
+            "type": "integer",
+            "description": "活动状态（0创建、1生效、2过期、3废弃）"
+          },
+          "startTime": {
+            "type": "string",
+            "description": "活动开始时间"
+          },
+          "endTime": {
+            "type": "string",
+            "description": "活动结束时间"
+          },
+          "tagId": {
+            "type": "string",
+            "description": "人群标签规则标识"
+          },
+          "tagScope": {
+            "type": "string",
+            "description": "人群标签规则范围"
+          },
+          "createTime": {
+            "type": "string",
+            "description": "创建时间"
+          },
+          "updateTime": {
+            "type": "string",
+            "description": "更新时间"
+          }
+        }
+      },
+      "ResponseListGroupBuyActivity": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": ""
+          },
+          "info": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GroupBuyActivity",
+              "description": "拼团活动实体类"
+            },
+            "description": ""
+          }
+        }
+      },
+      "Sku": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "自增",
+            "format": "int64"
+          },
+          "source": {
+            "type": "string",
+            "description": "来源"
+          },
+          "channel": {
+            "type": "string",
+            "description": "渠道"
+          },
+          "goodsId": {
+            "type": "string",
+            "description": "商品ID"
+          },
+          "goodsName": {
+            "type": "string",
+            "description": "商品名称"
+          },
+          "originalPrice": {
+            "type": "number",
+            "description": "原始价格"
+          },
+          "createTime": {
+            "type": "string",
+            "description": "创建时间"
+          },
+          "updateTime": {
+            "type": "string",
+            "description": "更新时间"
+          }
+        }
+      },
+      "Handler": {
+        "type": "object",
+        "properties": {}
+      },
+      "ResponseListSku": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": ""
+          },
+          "info": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Sku",
+              "description": ""
+            },
+            "description": ""
+          }
+        }
+      },
+      "MapString": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          }
+        }
+      },
+      "MediaType": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": ""
+          },
+          "subtype": {
+            "type": "string",
+            "description": ""
+          },
+          "parameters": {
+            "$ref": "#/components/schemas/MapString",
+            "description": ""
+          },
+          "toStringValue": {
+            "type": "string",
+            "description": "",
+            "nullable": true
+          }
+        }
+      },
+      "DataWithMediaType": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {},
+            "description": ""
+          },
+          "mediaType": {
+            "description": "",
+            "$ref": "#/components/schemas/MediaType",
+            "nullable": true
+          }
+        }
+      },
+      "Throwable": {
+        "type": "object",
+        "properties": {
+          "detailMessage": {
+            "type": "string",
+            "description": "Specific details about the Throwable.  For example, for\n{@code FileNotFoundException}, this contains the name of\nthe file that could not be found."
+          },
+          "cause": {
+            "$ref": "#/components/schemas/Throwable",
+            "description": "The throwable that caused this throwable to get thrown, or null if this\nthrowable was not caused by another throwable, or if the causative\nthrowable is unknown.  If this field is equal to this throwable itself,\nit indicates that the cause of this throwable has not yet been\ninitialized.",
+            "default": "this"
+          },
+          "stackTrace": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StackTraceElement"
+            },
+            "description": "The stack trace, as returned by{@link #getStackTrace()}.\n\nThe field is initialized to a zero-length array.  A{@code\n    * null} value of this field indicates subsequent calls to{@link\n    * #setStackTrace(StackTraceElement[])} and{@link\n    * #fillInStackTrace()} will be be no-ops.",
+            "default": "new StackTraceElement[0]"
+          },
+          "suppressedExceptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Throwable",
+              "description": "java.lang.Throwable"
+            },
+            "description": "The list of suppressed exceptions, as returned by{@link\n    * #getSuppressed()}.  The list is initialized to a zero-element\nunmodifiable sentinel list.  When a serialized Throwable is\nread in, if the{@code suppressedExceptions} field points to a\nzero-element list, the field is reset to the sentinel value.",
+            "default": "Collections.unmodifiableList(new ArrayList<Throwable>(0))"
+          }
+        }
+      },
+      "StackTraceElement": {
+        "type": "object",
+        "properties": {
+          "declaringClass": {
+            "type": "string",
+            "description": "Normally initialized by VM (public constructor added in 1.5)"
+          },
+          "methodName": {
+            "type": "string",
+            "description": ""
+          },
+          "fileName": {
+            "type": "string",
+            "description": ""
+          },
+          "lineNumber": {
+            "type": "integer",
+            "description": ""
+          }
+        }
+      },
+      "Runnable": {
+        "type": "object",
+        "properties": {}
+      },
+      "DefaultCallback": {
+        "type": "object",
+        "properties": {
+          "delegate": {
+            "description": "",
+            "$ref": "#/components/schemas/Runnable",
+            "nullable": true
+          }
+        }
+      },
+      "ErrorCallback": {
+        "type": "object",
+        "properties": {}
+      },
+      "SseEmitter": {
+        "type": "object",
+        "properties": {
+          "timeout": {
+            "type": "integer",
+            "description": "",
+            "format": "int64",
+            "nullable": true
+          },
+          "handler": {
+            "description": "",
+            "$ref": "#/components/schemas/Handler",
+            "nullable": true
+          },
+          "earlySendAttempts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataWithMediaType",
+              "description": "org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter.DataWithMediaType"
+            },
+            "description": ""
+          },
+          "complete": {
+            "type": "boolean",
+            "description": ""
+          },
+          "failure": {
+            "description": "",
+            "$ref": "#/components/schemas/Throwable",
+            "nullable": true
+          },
+          "sendFailed": {
+            "type": "boolean",
+            "description": ""
+          },
+          "timeoutCallback": {
+            "$ref": "#/components/schemas/DefaultCallback",
+            "description": ""
+          },
+          "errorCallback": {
+            "$ref": "#/components/schemas/ErrorCallback",
+            "description": ""
+          },
+          "completionCallback": {
+            "$ref": "#/components/schemas/DefaultCallback",
+            "description": ""
+          }
+        }
+      },
+      "CrowdTags": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "自增ID",
+            "format": "int64"
+          },
+          "tagId": {
+            "type": "string",
+            "description": "人群ID"
+          },
+          "tagName": {
+            "type": "string",
+            "description": "人群名称"
+          },
+          "tagDesc": {
+            "type": "string",
+            "description": "人群描述"
+          },
+          "statistics": {
+            "type": "integer",
+            "description": "人群标签统计量"
+          },
+          "createTime": {
+            "type": "string",
+            "description": "创建时间"
+          },
+          "updateTime": {
+            "type": "string",
+            "description": "更新时间"
+          }
+        }
+      },
+      "ResponseListCrowdTags": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": ""
+          },
+          "info": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrowdTags",
+              "description": ""
+            },
+            "description": ""
+          }
+        }
+      },
+      "GroupBuyDiscount": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "自增ID",
+            "format": "int64"
+          },
+          "discountId": {
+            "type": "integer",
+            "description": "折扣ID",
+            "format": "int64"
+          },
+          "discountName": {
+            "type": "string",
+            "description": "折扣标题"
+          },
+          "discountDesc": {
+            "type": "string",
+            "description": "折扣描述"
+          },
+          "discountType": {
+            "type": "integer",
+            "description": "折扣类型（0:base、1:tag）"
+          },
+          "marketPlan": {
+            "type": "string",
+            "description": "营销优惠计划（ZJ:直减、MJ:满减、N元购）"
+          },
+          "marketExpr": {
+            "type": "string",
+            "description": "营销优惠表达式"
+          },
+          "tagId": {
+            "type": "string",
+            "description": "人群标签，特定优惠限定"
+          },
+          "createTime": {
+            "type": "string",
+            "description": "创建时间"
+          },
+          "updateTime": {
+            "type": "string",
+            "description": "更新时间"
+          }
+        }
+      },
+      "ResponseListGroupBuyDiscount": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": ""
+          },
+          "info": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GroupBuyDiscount",
+              "description": "拼团折扣实体类"
+            },
+            "description": ""
+          }
+        }
+      },
+      "DiscountUpdateRequestDTO": {
+        "type": "object",
+        "properties": {
+          "discountId": {
+            "type": "string",
+            "description": "必须，作为唯一标识"
+          },
+          "discountName": {
+            "type": "string",
+            "description": ""
+          },
+          "discountDesc": {
+            "type": "string",
+            "description": ""
+          },
+          "discountType": {
+            "type": "integer",
+            "description": ""
+          },
+          "marketPlan": {
+            "type": "string",
+            "description": ""
+          },
+          "marketExpr": {
+            "type": "string",
+            "description": ""
+          },
+          "tagId": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "SCSkuActivity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "自增ID",
+            "format": "int64"
+          },
+          "source": {
+            "type": "string",
+            "description": "渠道"
+          },
+          "channel": {
+            "type": "string",
+            "description": "来源"
+          },
+          "activityId": {
+            "type": "integer",
+            "description": "活动ID",
+            "format": "int64"
+          },
+          "goodsId": {
+            "type": "string",
+            "description": "商品ID"
+          },
+          "createTime": {
+            "type": "string",
+            "description": "创建时间"
+          },
+          "updateTime": {
+            "type": "string",
+            "description": "更新时间"
+          }
+        }
+      },
+      "ResponseListSCSkuActivity": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": ""
+          },
+          "info": {
+            "type": "string",
+            "description": ""
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SCSkuActivity",
+              "description": ""
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "responses": {},
+    "securitySchemes": {}
+  },
+  "servers": [
+    {
+      "url": "http://111.228.51.8:8080",
+      "description": "在线演示环境"
+    }
+  ],
+  "security": []
+}

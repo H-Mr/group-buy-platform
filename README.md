@@ -1,6 +1,9 @@
 # 🛒 Group Buy Platform (拼团购物交易平台)
 
-在线接口文档：[点击查看 API 文档](group-buy-plataform.apifox.cn)
+- 在线接口文档：[点击查看 API 文档](group-buy-plataform.apifox.cn)  
+- API 文档: docs/api文档
+- 支付宝沙箱支付账户： tpgvta9856@sandbox.com
+- 支付宝沙箱登录密码&支付密码：111111
 
 
 ## 一. 项目背景 (Project Background)
@@ -86,9 +89,6 @@
 
 该模式允许管理员通过“后门密钥”动态开启体验开关，并下发体验令牌。体验者无需扫码，即可通过特定的 Token 模拟任意用户身份，完成下单、拼团等全链路测试。
 
-### 🛠 实验全流程图解
-下图展示了从管理员开启环境、获取体验凭证到用户模拟身份切换的完整操作闭环：
-![](docs/images/demoMode.png)
 ### 🧪 详细实验流程
 
 请按照以下步骤使用 Postman / APIFox 或在线文档进行体验：
@@ -98,7 +98,7 @@
 - 使用 **DCC 管理密钥** (`dccAdminSecret`) 访问 DCC 查询接口。
 - 找到 `demoTokenSwitch` 配置项，将其值更新为 `1`。
     - *接口示例*: `GET /api/v1/gbm/dcc/update_config?key=demoTokenSwitch&value=1`
-    - *Header*: `Authorization: admin-key-2024` (默认管理密钥)
+    - *Header*: `Authorization: Bearer admin-key-2024` (默认管理密钥)
 
 **2. 获取体验凭证**
 
@@ -123,12 +123,16 @@
 
 本功能完全基于 DCC 实现热更新，无需重启服务即可实时生效。
 
-| **配置项 Key**    | **默认值**                 | **说明**                                                     |
-| ----------------- | -------------------------- | ------------------------------------------------------------ |
-| `demoTokenSwitch` | `0`                        | **总开关**。`0`-关闭，`1`-开启。开启后允许使用体验 Token 访问。 |
-| `demoTokenSecret` | `experience-token-vip-888` | **体验令牌**。请求 Header 中 `Authorization` 携带的值。可随时修改以重置访问权限。 |
-| `demoUserId`      | `7736...96`                | **虚拟身份**。系统将把使用体验令牌的请求视为该 UserID 的操作。 |
-| `dccAdminSecret`  | `admin-key-2024`           | **管理钥匙**。仅用于访问 DCC 接口修改上述配置，拥有最高权限，请妥善保管。 |
+| **配置项 Key**    | **默认值**                           | **说明**                                                     |
+| ----------------- |-----------------------------------| ------------------------------------------------------------ |
+| `demoTokenSwitch` | `0`                               | **总开关**。`0`-关闭，`1`-开启。开启后允许使用体验 Token 访问。 |
+| `demoTokenSecret` | `Bearer experience-token-vip-888` | **体验令牌**。请求 Header 中 `Authorization` 携带的值。可随时修改以重置访问权限。 |
+| `demoUserId`      | `7736...96`                       | **虚拟身份**。系统将把使用体验令牌的请求视为该 UserID 的操作。 |
+| `dccAdminSecret`  | `Bearer admin-key-2024`           | **管理钥匙**。仅用于访问 DCC 接口修改上述配置，拥有最高权限，请妥善保管。 |
 
 💡 提示：线上环境建议默认关闭此开关。如需临时演示，可使用 DCC 管理密钥调用配置接口将 demoTokenSwitch 设为 1，演示结束后立即设回 0 以确保系统安全。
+
+### 🛠 实验全流程图解
+下图展示了从管理员开启环境、获取体验凭证到用户模拟身份切换的完整操作闭环：
+![](docs/images/demoMode.png)
 

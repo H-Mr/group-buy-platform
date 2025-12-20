@@ -51,7 +51,7 @@ public class MarketQueryController {
      * SSE 是“监听通道”，下单是“业务动作”，两者必须分开，通常是先监听，后下单（防止下单太快，还没连上SSE就拼团成功了导致漏接消息）。
      * 前端调用: const es = new EventSource("/api/v1/query/sse/subscribe?token=" + your_jwt_token);
      */
-    @GetMapping(value = "sse/subscribe", produces = "text/event-stream")
+    @GetMapping(value = "sse/subscribe", produces = "text/event-stream;charset=UTF-8")
     public SseEmitter subscribe(@RequestParam("token") String token) {
         // 1. 校验 Token 非空
         if (StringUtils.isBlank(token)) {

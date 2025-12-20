@@ -43,5 +43,6 @@ data/
 *.log
 
 log/
+logs/
 
 .env
