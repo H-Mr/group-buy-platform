@@ -1,4 +1,4 @@
-package cn.hjw.dev.platform.domain.trade.service.settlement;
+package cn.hjw.dev.platform.domain.trade.service.impl;
 
 import cn.hjw.dev.platform.domain.trade.event.GroupBuyCompletedEventTypeType;
 import cn.hjw.dev.platform.domain.trade.model.entity.*;
@@ -48,10 +48,10 @@ public class TradeSettlementOrderServiceImpl implements ITradeSettlementOrderSer
         TradePaySettlementEntity settlementEntity = settlementResult.getSettlementEntity();
         boolean completed = settlementResult.isCompleted();
         // 组队回调处理 - 处理失败也会有定时任务补偿，通过这样的方式，可以减轻任务调度，提高时效性
-//        if(completed) {
-//            // 发送包含 teamId 的事件，触发 "单条回调"
-//            groupBuyCompletedEventType.publishGroupBuyCompleted(settlementEntity.getTeamId());
-//        }
+        if(completed) {
+            // 发送包含 teamId 的事件，触发 "单条回调"
+            groupBuyCompletedEventType.publishGroupBuyCompleted(settlementEntity.getTeamId());
+        }
 
         // 5. 返回结算信息 - 公司中开发这样的流程时候，会根据外部需要进行值的设置
         return TradePaySettlementEntity.builder()

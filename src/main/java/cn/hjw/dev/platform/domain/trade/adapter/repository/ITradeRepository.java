@@ -38,4 +38,6 @@ public interface ITradeRepository {
     List<NotifyTaskEntity> queryUnExecutedNotifyTaskList();
 
     List<NotifyTaskEntity> queryUnExecutedNotifyTaskList(String teamId);
+
+    String queryTeamIdByTradeNo(String tradeNo);
 }

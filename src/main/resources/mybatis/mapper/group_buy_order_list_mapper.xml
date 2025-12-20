@@ -67,5 +67,9 @@
         select goods_id from group_buy_order_list where user_id = #{userId} and team_id = #{teamId} and status = 1
     </select>
 
+    <select id="queryTeamIdByOutTradeNo" parameterType="java.lang.String" resultType="java.lang.String">
+        select team_id from group_buy_order_list where out_trade_no = #{outTradeNo} and status = 0
+    </select>
+
 
 </mapper>

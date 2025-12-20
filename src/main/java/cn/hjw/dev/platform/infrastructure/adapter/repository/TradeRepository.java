@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @author Fuzhengwei hjw.dev.cn @小傅哥
  * @description 交易仓储服务
  * @create 2025-01-11 09:17
  */
@@ -362,6 +361,11 @@ public class TradeRepository implements ITradeRepository {
                 .notifyCount(notifyTask.getNotifyCount())
                 .parameterJson(notifyTask.getParameterJson())
                 .build());
+    }
+
+    @Override
+    public String queryTeamIdByTradeNo(String tradeNo) {
+        return "";
     }
 
     /**

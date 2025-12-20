@@ -12,10 +12,12 @@ import cn.hjw.dev.platform.domain.order.model.valobj.LockMarketPayOrderVO;
 import cn.hjw.dev.platform.domain.order.model.valobj.MarketTypeVO;
 import cn.hjw.dev.platform.domain.order.model.valobj.OrderStatusVO;
 import cn.hjw.dev.platform.domain.order.service.IOrderService;
+import cn.hjw.dev.platform.domain.trade.adapter.repository.ITradeRepository;
 import com.alipay.api.AlipayApiException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 
 /**
@@ -31,6 +33,9 @@ public abstract class AbstractOrderService implements IOrderService {
     protected final IOrderRepository repository;
 
     protected final IOrderPort port;
+
+    @Resource
+    private ITradeRepository tradeRepository;
 
     /**
      * 构造函数注入
@@ -52,24 +57,36 @@ public abstract class AbstractOrderService implements IOrderService {
     public PayOrderEntity createOrder(ShopCartEntity shopCartEntity) throws Exception {
         // 1. 查询当前用户是否存在掉单和未支付订单
         OrderEntity unpaidOrderEntity = repository.queryUnPayOrder(shopCartEntity);
-        // 判断：1. 存在未支付订单 2. 创建本地订单，但是没有创建预支付单
-        if (null != unpaidOrderEntity && OrderStatusVO.PAY_WAIT.equals(unpaidOrderEntity.getOrderStatusVO())) {
-            log.info("创建订单-存在，已存在未支付订单。userId:{} productId:{} orderId:{}", shopCartEntity.getUserId(), shopCartEntity.getProductId(), unpaidOrderEntity.getOrderId());
-            return PayOrderEntity.builder()
-                    .orderId(unpaidOrderEntity.getOrderId())
-                    .payUrl(unpaidOrderEntity.getPayUrl())
-                    .build();
-        } else if (null != unpaidOrderEntity && OrderStatusVO.CREATE.equals(unpaidOrderEntity.getOrderStatusVO())) {
-            // 创建本地订单，但是没有创建预支付单
-            log.info("创建订单-掉单，主订单创建，支付订单没有创建，orderId: {}", unpaidOrderEntity.getOrderId());
-            // 创建预支付订单
-            return this.doPrepayOrder(
-                    unpaidOrderEntity.getOrderId(),
-                    unpaidOrderEntity.getMarketDeductionAmount(),
-                    unpaidOrderEntity.getPayAmount(),
-                    unpaidOrderEntity.getProductName(),
-                    shopCartEntity.getSource(),
-                    shopCartEntity.getChannel());
+        if (ObjectUtils.isNotEmpty(unpaidOrderEntity)) {
+            String teamId = tradeRepository.queryTeamIdByTradeNo(unpaidOrderEntity.getOrderId());
+
+            // 判断：1. 存在未支付订单 2. 创建本地订单，但是没有创建预支付单
+            if (OrderStatusVO.PAY_WAIT.equals(unpaidOrderEntity.getOrderStatusVO())) {
+                log.info("创建订单-存在，已存在未支付订单。userId:{} productId:{} orderId:{}", shopCartEntity.getUserId(), shopCartEntity.getProductId(), unpaidOrderEntity.getOrderId());
+                return PayOrderEntity.builder()
+                        .orderId(unpaidOrderEntity.getOrderId())
+                        .payUrl(unpaidOrderEntity.getPayUrl())
+                        .teamId(teamId)
+                        .build();
+            }
+            if (OrderStatusVO.CREATE.equals(unpaidOrderEntity.getOrderStatusVO())) {
+                // 创建本地订单，但是没有创建预支付单
+                log.info("创建订单-掉单，主订单创建，支付订单没有创建，orderId: {}", unpaidOrderEntity.getOrderId());
+                // 创建预支付订
+                PayOrderEntity prepayOrder = this.doPrepayOrder(
+                        unpaidOrderEntity.getOrderId(),
+                        unpaidOrderEntity.getMarketDeductionAmount(),
+                        unpaidOrderEntity.getPayAmount(),
+                        unpaidOrderEntity.getProductName(),
+                        shopCartEntity.getSource(),
+                        shopCartEntity.getChannel());
+
+                return PayOrderEntity.builder()
+                        .orderId(prepayOrder.getOrderId())
+                        .payUrl(prepayOrder.getPayUrl())
+                        .teamId(teamId)
+                        .build();
+            }
         }
         // 正常流程创建新主订单
 

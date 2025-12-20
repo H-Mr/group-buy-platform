@@ -106,6 +106,7 @@ public class MarketTradeController implements IMarketTradeService {
                     .deductionPrice(pendingPayLockOrder.getDeductionPrice())
                     .tradeOrderStatus(pendingPayLockOrder.getTradeOrderStatusEnumVO().getCode())
                     .payPrice(pendingPayLockOrder.getPayPrice()) // 支付价格
+                    .teamId(pendingPayLockOrder.getTeamId())
                     .build();
 
             return Response.<LockMarketPayOrderResponseDTO>builder()

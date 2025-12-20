@@ -41,4 +41,6 @@ public interface IGroupBuyOrderListDao {
     List<String> queryGroupBuyCompleteOrderUserIdListByTeamId(String teamId);
 
     List<String> queryGoodsIdByUserIdAndTeamId(@Param("userId") String userId, @Param("teamId") String teamId);
+
+    String queryTeamIdByOutTradeNo(String outTradeNo);
 }
