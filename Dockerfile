@@ -50,4 +50,4 @@ USER appuser
 
 
 # 12. 启动命令（相对路径，简洁且符合WORKDIR规范）
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar --spring.profiles.active=prod"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE} -jar app.jar"]

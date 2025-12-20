@@ -355,7 +355,7 @@ repackage 虽然默认绑定到 package 阶段，但显式配置 <executions> �
           </execution>
         </executions>
         <configuration>
-          <mainClass>cn.hjw.dev.platform.groupBuyPlatformApplication</mainClass>
+          <mainClass>cn.hjw.dev.platform.GroupBuyPlatformApplication</mainClass>
           <includeSystemScope>true</includeSystemScope>
         </configuration>
       </plugin>

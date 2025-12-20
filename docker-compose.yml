@@ -63,6 +63,7 @@ services:
     restart: always
     environment:
       <<: *common-env  # 复用通用时区配置
+      SPRING_PROFILES_ACTIVE: prod
       # 可覆盖Dockerfile中的JAVA_OPTS，无需重建镜像
       JAVA_OPTS: "-Xms512m -Xmx512m -XX:+UseG1GC -XX:MaxMetaspaceSize=128m -Dfile.encoding=UTF-8 -Djava.security.egd=file:/dev/./urandom"
     ports:
