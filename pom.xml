@@ -180,7 +180,9 @@
       <artifactId>java-dotenv</artifactId>
       <version>5.2.2</version>
         <!-- provided：编译时可用，打包时默认不包含 -->
-      <scope>provided</scope>
+        <scope>compile</scope>
+        <!-- 仅在dev环境生效 -->
+        <optional>true</optional>
     </dependency>
 
 <!--
@@ -367,6 +369,13 @@ repackage 虽然默认绑定到 package 阶段，但显式配置 <executions> �
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
+        <dependencies>
+            <dependency>
+                <groupId>io.github.cdimascio</groupId>
+                <artifactId>java-dotenv</artifactId>
+                <version>5.2.2</version>
+            </dependency>
+        </dependencies>
       <properties>
         <java_jvm>-Xms1G -Xmx1G -server  -XX:MaxPermSize=256M -Xss256K -Dspring.profiles.active=test -XX:+DisableExplicitGC -XX:+UseG1GC  -XX:LargePageSizeInBytes=128m -XX:+UseFastAccessorMethods -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/export/Logs/group-market-boot -Xloggc:/export/Logs/group-market-boot/gc-group-market-boot.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps</java_jvm>
         <profileActive>dev</profileActive>
