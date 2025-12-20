@@ -3,6 +3,7 @@ package cn.hjw.dev.platform.types.exception;
 import cn.hjw.dev.platform.types.enums.ResponseCode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.IssuerUriCondition;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -18,27 +19,25 @@ public class AppException extends RuntimeException {
 
     public AppException(String code) {
         this.code = code;
+
     }
 
     public AppException(ResponseCode responseCode) {
+        super(responseCode.getInfo());
         this.code = responseCode.getCode();
         this.info = responseCode.getInfo();
     }
 
-    public AppException(String code, Throwable cause) {
-        this.code = code;
-        super.initCause(cause);
-    }
-
     public AppException(String code, String message) {
+        super(message);
         this.code = code;
         this.info = message;
     }
 
-    public AppException(String code, String message, Throwable cause) {
-        this.code = code;
+    public AppException(ResponseCode responseCode, String message) {
+        super(message);
+        this.code = responseCode.getCode();
         this.info = message;
-        super.initCause(cause);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package cn.hjw.dev.platform.domain.order.event;
 
+import cn.hjw.dev.platform.api.dto.PaySuccessNotifyDTO;
 import cn.hjw.dev.platform.domain.order.model.valobj.OrderStatusVO;
 import cn.hjw.dev.platform.types.event.BaseEventType;
 import com.google.common.eventbus.EventBus;
@@ -29,11 +30,13 @@ public class OrderStatusChangedEventType extends BaseEventType<OrderStatusChange
      * @param orderId 订单ID
      * @param orderStatus 订单状态
      */
-    public void publishOrderStatusChangedEvent(String orderId, OrderStatusVO orderStatus,LocalDateTime paySuccessTime) {
+    public void publishOrderStatusChangedEvent(PaySuccessNotifyDTO paySuccessNotifyDTO) {
          ChangedOrder payload = ChangedOrder.builder()
-                .orderId(orderId)
-                .orderStatus(orderStatus)
-                .paySuccessTime(paySuccessTime)
+                .orderId(paySuccessNotifyDTO.getTradeNo())
+                .orderStatus(paySuccessNotifyDTO.getOrderStatusVO())
+                .paySuccessTime(paySuccessNotifyDTO.getPayTime())
+                .channel(paySuccessNotifyDTO.getChannel())
+                .source(paySuccessNotifyDTO.getSource())
                 .build();
         Message<ChangedOrder> eventMessage = buildEventPayload(payload);
         eventBus.post(eventMessage);
@@ -51,6 +54,8 @@ public class OrderStatusChangedEventType extends BaseEventType<OrderStatusChange
         OrderStatusVO orderStatus; // 本次处理对订单的状态变更
         String orderId; // 待处理状态的订单ID
         LocalDateTime paySuccessTime; // 支付成功时间
+        String source; // 订单来源
+        String channel; // 订单渠道
     }
 
 

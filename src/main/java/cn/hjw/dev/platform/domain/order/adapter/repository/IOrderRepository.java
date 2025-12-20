@@ -15,7 +15,7 @@ public interface IOrderRepository {
 
     OrderEntity queryUnPayOrder(ShopCartEntity shopCartEntity);
 
-    void updateOrderPayInfo(PayOrderEntity payOrderEntity);
+    void updateOrder2WaitPay(PayOrderEntity payOrderEntity);
 
     OrderEntity changeOrder2Success(String orderId, LocalDateTime payTime);
 

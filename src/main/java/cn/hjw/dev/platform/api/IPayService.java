@@ -1,5 +1,6 @@
 package cn.hjw.dev.platform.api;
 
+import cn.hjw.dev.platform.api.dto.CreateOrderDTO;
 import cn.hjw.dev.platform.api.dto.CreatePayRequestDTO;
 import cn.hjw.dev.platform.api.response.Response;
 
@@ -13,5 +14,5 @@ public interface IPayService {
      * @param createPayRequestDTO
      * @return
      */
-    Response<String> createPayOrder(CreatePayRequestDTO createPayRequestDTO);
+    Response<CreateOrderDTO> createPayOrder(CreatePayRequestDTO createPayRequestDTO) throws Exception;
 }

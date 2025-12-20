@@ -2,8 +2,11 @@ package cn.hjw.dev.platform.trigger.http;
 
 import cn.hjw.dev.platform.api.response.Response;
 import cn.hjw.dev.platform.infrastructure.dcc.DccValueManager;
+import cn.hjw.dev.platform.infrastructure.redis.IRedisService;
 import cn.hjw.dev.platform.types.enums.ResponseCode;
+import cn.hjw.dev.platform.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RBucket;
 import org.redisson.api.RTopic;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +29,9 @@ public class DCCController {
     @Resource
     private DccValueManager dccValueManager;
 
+    @Resource
+    private IRedisService redisService;
+
     /**
      * 动态更新配置接口
      */
@@ -33,7 +39,10 @@ public class DCCController {
     public Response<Boolean> updateConfig(@RequestParam("key") String key, @RequestParam("value") String value) {
         try {
             log.info("DCC 请求变更: {} -> {}", key, value);
-            // 发布到 Redis，触发所有节点更新
+            // 第1步：持久化 - 必须先写入 Redis Bucket，确保重启后能拉取到最新值
+            String configKey = "DCC:" + key;
+            redisService.setValue(configKey, value);
+            // 第2步：广播通知 - 发送消息给所有服务实例，触发 dccValueManager.refresh 更新内存
             dccTopic.publish(key + "," + value);
             return Response.<Boolean>builder()
                     .code(ResponseCode.SUCCESS.getCode())
@@ -42,10 +51,7 @@ public class DCCController {
                     .build();
         } catch (Exception e) {
             log.error("DCC 变更失败", e);
-            return Response.<Boolean>builder()
-                    .code(ResponseCode.UN_ERROR.getCode())
-                    .info("变更失败")
-                    .build();
+            throw new AppException(ResponseCode.UN_ERROR,"DCC 变更失败");
         }
     }
 

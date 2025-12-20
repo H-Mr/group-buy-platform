@@ -20,15 +20,7 @@
         <result column="update_time" property="updateTime"/>
     </resultMap>
 
-    <insert id="insert" parameterType="cn.hjw.dev.platform.infrastructure.dao.po.PayOrder">
-        insert into pay_order(
-            user_id, product_id, product_name, order_id, order_time,
-            total_amount, status, market_type, market_deduction_amount, pay_amount, create_time, update_time)
-        values(
-                  #{userId}, #{productId}, #{productName}, #{orderId}, #{orderTime},
-                  #{totalAmount}, #{status}, #{marketType}, #{marketDeductionAmount}, #{payAmount}, now(), now())
-    </insert>
-
+<!--    user_id pay_time-->
     <select id="queryUnPayOrder" parameterType="cn.hjw.dev.platform.infrastructure.dao.po.PayOrder" resultMap="dataMap">
         select product_id, product_name, order_id, order_time, total_amount, status, pay_url, market_type, market_deduction_amount, pay_amount
         from pay_order
@@ -37,28 +29,12 @@
             limit 1
     </select>
 
-    <update id="updateOrderPayInfo" parameterType="cn.hjw.dev.platform.infrastructure.dao.po.PayOrder">
-        update pay_order set pay_url = #{payUrl}, status = #{status},pay_time = #{payTime},
-                             market_deduction_amount = #{marketDeductionAmount}, pay_amount = #{payAmount},
-                             update_time = now()
-        where order_id = #{orderId}
-    </update>
-
-    <update id="changeOrderPaySuccess" parameterType="cn.hjw.dev.platform.infrastructure.dao.po.PayOrder">
-        update pay_order set status = #{status}, pay_time = now(), update_time = now()
-        where order_id = #{orderId}
-    </update>
-
-    <update id="changeOrderClose" parameterType="java.lang.String">
-        update pay_order set status = 'CLOSE', pay_time = now(), update_time = now()
-        where order_id = #{orderId}
-    </update>
-
+<!--    15分钟超时-->
     <select id="queryTimeoutCloseOrderList" parameterType="java.lang.String" resultType="java.lang.String">
         SELECT order_id as orderId FROM pay_order
         WHERE status = 'PAY_WAIT' AND NOW() >= order_time + INTERVAL 15 MINUTE
         ORDER BY id ASC
-            LIMIT 50
+        LIMIT 50
     </select>
 
     <select id="queryPayOrderById" parameterType="java.lang.String" resultMap="dataMap">
@@ -71,18 +47,10 @@
         SELECT order_id as orderId FROM pay_order
         WHERE status = 'PAY_WAIT' AND NOW() >= order_time + INTERVAL 1 MINUTE
         ORDER BY id ASC
-            LIMIT 10
+        LIMIT 10
     </select>
 
-    <update id="changeOrderMarketSettlement" parameterType="java.util.List">
-        update pay_order set status = 'MARKET', update_time = now()
-        where order_id in
-        <foreach item="orderId" collection="outTradeNoList" open="(" separator="," close=")">
-            #{orderId}
-        </foreach>
-    </update>
-
-<!--    悲观锁加事务控制-->
+    <!--    悲观锁加事务控制-->
     <select id="queryPayOrderIdForUpdate" parameterType="cn.hjw.dev.platform.infrastructure.dao.po.PayOrder" resultMap="dataMap">
         select user_id, product_id, product_name, order_id, order_time, total_amount, status, pay_url, market_type, market_deduction_amount, pay_amount
         from pay_order
@@ -94,11 +62,6 @@
         from pay_order
         where order_id = #{orderId}
     </select>
-
-    <update id="changeOrderDealDone" parameterType="java.lang.String">
-        update pay_order set status = 'DEAL_DONE', update_time = now()
-        where order_id = #{orderId}
-    </update>
 
     <select id="queryUserOrderList" resultMap="dataMap">
         select id, user_id, product_id, product_name, order_id, order_time, total_amount, status, pay_url, pay_time, market_type, market_deduction_amount, pay_amount
@@ -117,6 +80,31 @@
         where user_id = #{userId} and order_id = #{orderId}
     </select>
 
+    <!--创建本地订单，还没有创建预支付订单-->
+    <insert id="insert" parameterType="cn.hjw.dev.platform.infrastructure.dao.po.PayOrder">
+        insert into pay_order(
+            user_id, product_id, product_name, order_id, order_time,
+            total_amount, status, market_type, market_deduction_amount, pay_amount, create_time, update_time)
+        values(
+              #{userId}, #{productId}, #{productName}, #{orderId}, #{orderTime},
+              #{totalAmount}, #{status}, #{marketType}, #{marketDeductionAmount}, #{payAmount}, now(), now()
+              )
+    </insert>
+
+
+    <update id="changeOrderMarketSettlement" parameterType="java.util.List">
+        update pay_order set status = 'MARKET', update_time = now()
+        where order_id in
+        <foreach item="orderId" collection="outTradeNoList" open="(" separator="," close=")">
+            #{orderId}
+        </foreach>
+    </update>
+
+    <update id="changeOrderDealDone" parameterType="java.lang.String">
+        update pay_order set status = 'DEAL_DONE', update_time = now()
+        where order_id = #{orderId}
+    </update>
+
     <update id="refundOrder">
         update pay_order
         set status = 'CLOSE', update_time = now()
@@ -127,6 +115,63 @@
         update pay_order
         set status = 'WAIT_REFUND', update_time = now()
         where user_id = #{userId} and order_id = #{orderId}
+    </update>
+
+    <update id="updatePayOrderByCondition" parameterType="cn.hjw.dev.platform.infrastructure.dao.po.PayOrder">
+        UPDATE pay_order
+        <set>
+            <!-- 动态更新字段：访问更新实体（updatePayOrder）的属性 -->
+            <if test="updatePayOrder.userId != null and updatePayOrder.userId != ''">
+                user_id = #{updatePayOrder.userId},
+            </if>
+            <if test="updatePayOrder.productId != null and updatePayOrder.productId != ''">
+                product_id = #{updatePayOrder.productId},
+            </if>
+            <if test="updatePayOrder.productName != null and updatePayOrder.productName != ''">
+                product_name = #{updatePayOrder.productName},
+            </if>
+            <if test="updatePayOrder.orderTime != null">
+                order_time = #{updatePayOrder.orderTime},
+            </if>
+            <if test="updatePayOrder.totalAmount != null">
+                total_amount = #{updatePayOrder.totalAmount},
+            </if>
+            <if test="updatePayOrder.status != null and updatePayOrder.status != ''">
+                status = #{updatePayOrder.status},
+            </if>
+            <if test="updatePayOrder.payUrl != null and updatePayOrder.payUrl != ''">
+                pay_url = #{updatePayOrder.payUrl},
+            </if>
+            <if test="updatePayOrder.payTime != null">
+                pay_time = #{updatePayOrder.payTime},
+            </if>
+            <if test="updatePayOrder.marketType != null">
+                market_type = #{updatePayOrder.marketType},
+            </if>
+            <if test="updatePayOrder.marketDeductionAmount != null">
+                market_deduction_amount = #{updatePayOrder.marketDeductionAmount},
+            </if>
+            <if test="updatePayOrder.payAmount != null">
+                pay_amount = #{updatePayOrder.payAmount},
+            </if>
+            <!-- 统一更新修改时间，无需手动传参 -->
+            update_time = now()
+        </set>
+        <!-- 动态查询条件：访问条件实体（conditionPayOrder）的属性 -->
+        <where>
+            <if test="conditionPayOrder.orderId != null and conditionPayOrder.orderId != ''">
+                AND order_id = #{conditionPayOrder.orderId}
+            </if>
+            <if test="conditionPayOrder.userId != null and conditionPayOrder.userId != ''">
+                AND user_id = #{conditionPayOrder.userId}
+            </if>
+            <if test="conditionPayOrder.status != null and conditionPayOrder.status != ''">
+                AND status = #{conditionPayOrder.status}
+            </if>
+            <if test="conditionPayOrder.productId != null and conditionPayOrder.productId != ''">
+                AND product_id = #{conditionPayOrder.productId}
+            </if>
+        </where>
     </update>
 
 </mapper>

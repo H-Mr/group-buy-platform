@@ -56,7 +56,7 @@ public class NotifyEventListener {
             log.info("通知DAG执行完成，结果统计: {}", execRes);
 
         } catch (Exception e) {
-            log.error("通知DAG执行异常", e);
+            log.info(e.getMessage());
         }
     }
 

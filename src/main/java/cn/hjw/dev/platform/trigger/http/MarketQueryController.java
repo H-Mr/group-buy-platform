@@ -5,11 +5,14 @@ import cn.hjw.dev.platform.infrastructure.dao.IGroupBuyActivityDao;
 import cn.hjw.dev.platform.infrastructure.dao.ISkuDao;
 import cn.hjw.dev.platform.infrastructure.dao.po.GroupBuyActivity;
 import cn.hjw.dev.platform.infrastructure.dao.po.Sku;
+import cn.hjw.dev.platform.infrastructure.dcc.DynamicConfigCenter;
 import cn.hjw.dev.platform.infrastructure.sse.SseSessionManager;
 import cn.hjw.dev.platform.types.enums.ResponseCode;
+import cn.hjw.dev.platform.types.exception.AppException;
 import cn.hjw.dev.platform.types.utils.JwtUtils;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -39,6 +42,10 @@ public class MarketQueryController {
     @Resource
     private JwtUtils jwtUtils; // 注入工具类
 
+    // 1. 注入动态配置中心 (必须)
+    @Resource
+    private DynamicConfigCenter dynamicConfigCenter;
+
     /**
      * SSE 接收拼团结果通知
      * SSE 是“监听通道”，下单是“业务动作”，两者必须分开，通常是先监听，后下单（防止下单太快，还没连上SSE就拼团成功了导致漏接消息）。
@@ -46,34 +53,36 @@ public class MarketQueryController {
      */
     @GetMapping(value = "sse/subscribe", produces = "text/event-stream")
     public SseEmitter subscribe(@RequestParam("token") String token) {
-        try {
-            // 1. 校验 Token 非空
-            if (StringUtils.isBlank(token)) {
-                log.warn("SSE连接失败: Token为空");
-                return null;
-            }
-
-            // 2. 解析 Token 获取 userId (这是最关键的一步，从加密串中拿 ID，不可伪造)
-            Claims claims = jwtUtils.parseToken(token);
-            if (claims == null) {
-                log.warn("SSE连接失败: Token解析为空");
-                return null;
-            }
-
-            String userId = (String) claims.get("userId"); // 确保 key 和生成时一致
-            if (StringUtils.isBlank(userId)) {
-                log.warn("SSE连接失败: Token中无UserId");
-                return null;
-            }
-
-            // 3. 建立连接 (使用解析出来的 userId)
-            return sseSessionManager.connect(userId);
-
-        } catch (Exception e) {
-            log.error("SSE连接鉴权异常", e);
-            // 这里可以返回一个会立马报错的 Emitter，或者直接抛异常让前端重连
-            return null;
+        // 1. 校验 Token 非空
+        if (StringUtils.isBlank(token)) {
+            log.warn("SSE连接失败: Token为空");
+            throw new AppException(ResponseCode.UN_ERROR.getCode(), "token不能为空，SSE连接鉴权失败.");
         }
+        String userId;
+        // 2. 优先检查是否为演示/体验 Token (与 LoginInterceptor 逻辑保持一致)
+        if (dynamicConfigCenter.isDemoTokenOpen() && token.equals(dynamicConfigCenter.getDemoTokenSecret())) {
+            userId = dynamicConfigCenter.getDemoUserId();
+            log.info("SSE使用体验Token连接，用户ID: {}", userId);
+        } else {
+            try {
+                // 3. 如果不是演示Token，再尝试进行 JWT 解析
+                Claims claims = jwtUtils.parseToken(token);
+                if (ObjectUtils.isEmpty(claims)) {
+                    log.warn("SSE连接失败: Token解析失败");
+                    throw new AppException(ResponseCode.UN_ERROR.getCode(), "SSE连接鉴权失败: Token无效或已过期.");
+                }
+                userId = (String) claims.get("userId"); // 确保 key 和生成时一致
+                if (StringUtils.isBlank(userId)) {
+                    log.warn("SSE连接失败: Token中无UserId");
+                    throw new AppException(ResponseCode.UN_ERROR.getCode(), "SSE连接鉴权失败: Token无效或已过期.");
+                }
+            } catch (Exception e) {
+                log.warn("SSE连接失败: Token解析异常", e);
+                throw new AppException(ResponseCode.UN_ERROR.getCode(), "SSE连接鉴权失败: Token无效或已过期.");
+            }
+        }
+        // 3. 建立连接 (使用解析出来的 userId)
+        return sseSessionManager.connect(userId);
     }
 
     /**

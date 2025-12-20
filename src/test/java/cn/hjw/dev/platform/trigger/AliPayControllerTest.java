@@ -1,6 +1,7 @@
 package cn.hjw.dev.platform.trigger;
 
 import cn.hjw.dev.platform.api.IPayService;
+import cn.hjw.dev.platform.api.dto.CreateOrderDTO;
 import cn.hjw.dev.platform.api.dto.CreatePayRequestDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,7 @@ public class AliPayControllerTest {
     private IPayService payService;
 
     @Test
-    public void testCreatePayOrder() {
+    public void testCreatePayOrder() throws Exception {
         // 入参信息
         Long activityId = 100123L;
         String userId = "hhjjww11";
@@ -28,7 +29,7 @@ public class AliPayControllerTest {
                 .activityId(activityId)
                 .productId(productId)
                 .build();
-        String payUrl = payService.createPayOrder(payRequestDTO).getData();
-        log.info("商品下单，根据商品ID创建支付单完成 payUrl:{}", payUrl);
+        CreateOrderDTO data = payService.createPayOrder(payRequestDTO).getData();
+        log.info("商品下单，根据商品ID创建支付单完成 payUrl:{}", data.getPayUrl());
     }
 }

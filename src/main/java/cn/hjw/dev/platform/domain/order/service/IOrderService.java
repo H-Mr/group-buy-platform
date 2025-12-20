@@ -10,7 +10,7 @@ public interface IOrderService {
 
     PayOrderEntity createOrder(ShopCartEntity shopCartEntity) throws Exception;
 
-    void changeOrderPaySuccess(String orderId, LocalDateTime payTime);
+    void changeOrderPaySuccess(String orderId, LocalDateTime payTime,String source,String channel);
 
     List<String> queryNoPayNotifyOrder();
 

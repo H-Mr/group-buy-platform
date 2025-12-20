@@ -51,7 +51,6 @@ public class OrderRepository implements IOrderRepository {
             orderDao.insert(order);
         } catch (DuplicateKeyException e) {
             // 订单已存在，忽略重复插入
-            return;
         }
     }
 
@@ -81,28 +80,10 @@ public class OrderRepository implements IOrderRepository {
                 .orderTime(order.getOrderTime())
                 .totalAmount(order.getTotalAmount())
                 .marketDeductionAmount(order.getMarketDeductionAmount())
-                .totalAmount(order.getTotalAmount())
                 .payAmount(order.getPayAmount())
                 .payUrl(order.getPayUrl())
                 .build();
     }
-
-    /**
-     * 更新订单支付信息
-     * @param payOrderEntity
-     */
-    @Override
-    public void updateOrderPayInfo(PayOrderEntity payOrderEntity) {
-        PayOrder payOrderReq = PayOrder.builder()
-                .orderId(payOrderEntity.getOrderId())
-                .status(payOrderEntity.getOrderStatus().getCode())
-                .payUrl(payOrderEntity.getPayUrl())
-                .payAmount(payOrderEntity.getPayAmount())
-                .marketDeductionAmount(payOrderEntity.getMarketDeductionAmount())
-                .build();
-        orderDao.updateOrderPayInfo(payOrderReq);
-    }
-
 
     /**
      * 查询未收到支付通知的订单列表
@@ -123,6 +104,51 @@ public class OrderRepository implements IOrderRepository {
         return ObjectUtils.isEmpty(orderList) ? Collections.emptyList() : orderList;
     }
 
+    /**
+     * 根据订单ID查询支付订单
+     * @param orderId
+     * @return
+     */
+    @Override
+    public OrderEntity queryPayOrderById(String orderId) {
+        PayOrder payedOrder = orderDao.queryPayOrderById(orderId);
+        // 3. 返回结果
+        return OrderEntity.builder()
+                .productId(payedOrder.getProductId())
+                .productName(payedOrder.getProductName())
+                .orderId(payedOrder.getOrderId())
+                .orderStatusVO(OrderStatusVO.valueOf(payedOrder.getStatus()))
+                .orderTime(payedOrder.getOrderTime())
+                .marketType(MarketTypeVO.valueOf(payedOrder.getMarketType()))
+                .userId(payedOrder.getUserId())
+                .marketDeductionAmount(payedOrder.getMarketDeductionAmount())
+                .totalAmount(payedOrder.getTotalAmount())
+                .payTime(payedOrder.getPayTime())
+                .payUrl(payedOrder.getPayUrl())
+                .build();
+    }
+
+
+
+
+    /**
+     * 补充待支付信息
+     * @param payOrderEntity
+     */
+    @Override
+    public void updateOrder2WaitPay(PayOrderEntity payOrderEntity) {
+        PayOrder updateOrder = PayOrder.builder()
+                        .payUrl(payOrderEntity.getPayUrl())
+                        .status(OrderStatusVO.PAY_WAIT.getCode())
+                        .build();
+        PayOrder condition = new PayOrder();
+        condition.setOrderId(payOrderEntity.getOrderId());
+        condition.setStatus(OrderStatusVO.CREATE.getCode());
+
+
+
+        orderDao.updatePayOrderByCondition(updateOrder,condition);
+    }
 
     /**
      * 修改订单支付成功状态
@@ -133,20 +159,22 @@ public class OrderRepository implements IOrderRepository {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public OrderEntity changeOrder2Success(String orderId, LocalDateTime payTime) {
-        PayOrder payOrderReq = new PayOrder();
-        payOrderReq.setOrderId(orderId);
-        payOrderReq.setStatus(OrderStatusVO.PAY_WAIT.getCode()); // 只更新待支付状态的订单
 
-        PayOrder payedOrder = orderDao.queryPayOrderIdForUpdate(payOrderReq);
+        PayOrder updatedOrder = new PayOrder();
+        updatedOrder.setStatus(OrderStatusVO.PAY_SUCCESS.getCode());
+        updatedOrder.setPayTime(payTime);
+
+        PayOrder condOrder = new PayOrder();
+        condOrder.setOrderId(orderId); // 订单ID
+        condOrder.setStatus(OrderStatusVO.PAY_WAIT.getCode()); // 只更新待支付状态的订单
+
+        PayOrder payedOrder = orderDao.queryPayOrderIdForUpdate(condOrder);
         if (Objects.isNull(payedOrder)) {
             // 订单已支付或已关闭，直接返回空
             return null;
         }
 
-        payedOrder.setPayTime(payTime); // 设置支付时间
-        payedOrder.setStatus(OrderStatusVO.PAY_SUCCESS.getCode()); // 更新订单状态
-
-        orderDao.updateOrderPayInfo(payedOrder);
+        orderDao.updatePayOrderByCondition(updatedOrder, condOrder);
 
         return  OrderEntity.builder()
                 .productId(payedOrder.getProductId())
@@ -155,11 +183,10 @@ public class OrderRepository implements IOrderRepository {
                 .orderStatusVO(OrderStatusVO.valueOf(payedOrder.getStatus()))
                 .orderTime(payedOrder.getOrderTime())
                 .marketType(MarketTypeVO.valueOf(payedOrder.getMarketType()))
-                .payTime(payedOrder.getPayTime())
-                .orderId(payedOrder.getOrderId())
                 .userId(payedOrder.getUserId())
                 .marketDeductionAmount(payedOrder.getMarketDeductionAmount())
                 .totalAmount(payedOrder.getTotalAmount())
+                .payTime(payedOrder.getPayTime())
                 .payUrl(payedOrder.getPayUrl())
                 .build();
     }
@@ -173,37 +200,21 @@ public class OrderRepository implements IOrderRepository {
     @Override
     @Transactional
     public boolean changeOrder2Close(String orderId) {
-        PayOrder payOrderReq = new PayOrder();
-        payOrderReq.setOrderId(orderId);
-        payOrderReq.setStatus(OrderStatusVO.PAY_WAIT.getCode()); // 只更新待支付状态的订单
 
-        PayOrder closedOrder = orderDao.queryPayOrderIdForUpdate(payOrderReq);
-        if (Objects.isNull(closedOrder)) {
-            // 订单已支付或已关闭，直接返回
+        PayOrder updatedOrder = new PayOrder();
+        updatedOrder.setStatus(OrderStatusVO.CLOSE.getCode());
+
+        PayOrder condOrder = new PayOrder();
+        condOrder.setOrderId(orderId); // 订单ID
+        condOrder.setStatus(OrderStatusVO.PAY_WAIT.getCode()); // 只更新待支付状态的订单
+
+
+        PayOrder waitClosedOrder = orderDao.queryPayOrderIdForUpdate(condOrder);
+        if (Objects.isNull(waitClosedOrder)) {
+            // 已关闭，直接返回
             return true;
         }
-        closedOrder.setStatus(OrderStatusVO.CLOSE.getCode());
-        return orderDao.updateOrderPayInfo(closedOrder) == 1;
-    }
-
-    /**
-     * 根据订单ID查询支付订单
-     * @param orderId
-     * @return
-     */
-    @Override
-    public OrderEntity queryPayOrderById(String orderId) {
-        PayOrder order = orderDao.queryPayOrderById(orderId);
-        // 3. 返回结果
-        return OrderEntity.builder()
-                .productId(order.getProductId())
-                .productName(order.getProductName())
-                .orderId(order.getOrderId())
-                .orderStatusVO(OrderStatusVO.valueOf(order.getStatus()))
-                .orderTime(order.getOrderTime())
-                .totalAmount(order.getTotalAmount())
-                .payUrl(order.getPayUrl())
-                .build();
+        return orderDao.updatePayOrderByCondition(updatedOrder, condOrder) == 1;
     }
 
 }

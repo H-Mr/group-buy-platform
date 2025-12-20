@@ -20,7 +20,7 @@ public class GroupBuyNotifyJob {
     @Resource
     private GroupBuyCompletedEventTypeType groupBuyCompletedEventType; // 注入组队完成事件
 
-    @Scheduled(cron = "0/15 * * * * ?")
+    @Scheduled(cron = "0 * * * * ?")
     public void exec() {
         try {
 

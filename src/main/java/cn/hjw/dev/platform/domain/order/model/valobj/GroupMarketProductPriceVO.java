@@ -22,4 +22,6 @@ public class GroupMarketProductPriceVO {
         private BigDecimal deductionPrice;
         /** 支付金额 */
         private BigDecimal payPrice;
+        /** teamId */
+        private String teamId;
 }

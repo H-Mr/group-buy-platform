@@ -48,7 +48,7 @@ public class DynamicConfigCenter {
     @DCCValue(value = "tokenExpireConfig:1800,604800", description = "Token过期时间(秒): access,refresh")
     private volatile String tokenExpireConfig = "1800,604800";
 
-    // 新增：DCC 接口专用访问密钥 (相当于一把只能开配电箱的钥匙)
+    // 新增：DCC 接口专用访问密钥
     @Getter
     @DCCValue(value = "dccAdminSecret:Bearer dcc-admin-key", description = "DCC接口专用管理密钥")
     private volatile String dccAdminSecret = "Bearer dcc-admin-key";

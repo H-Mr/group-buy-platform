@@ -10,6 +10,7 @@ import cn.hjw.dev.platform.domain.order.adapter.port.IOrderPort;
 import cn.hjw.dev.platform.domain.order.model.entity.ProductEntity;
 import cn.hjw.dev.platform.domain.order.model.valobj.GroupMarketProductPriceVO;
 import cn.hjw.dev.platform.domain.order.model.valobj.LockMarketPayOrderVO;
+import cn.hjw.dev.platform.domain.order.model.valobj.SettlementMarketPayOrderVO;
 import cn.hjw.dev.platform.infrastructure.dao.ISkuDao;
 import cn.hjw.dev.platform.infrastructure.dao.po.Sku;
 import cn.hjw.dev.platform.infrastructure.gateway.AlipayRequestGateway;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -96,29 +98,30 @@ public class OrderPortImpl implements IOrderPort {
         requestDTO.setNotifyUrl(notifyUrl); // 设置成团回调地址
         Response<LockMarketPayOrderResponseDTO> lockedMarketResponse = marketTradeService.lockMarketPayOrder(requestDTO);
         if (ObjectUtils.isEmpty(lockedMarketResponse))
-                return null;
+               throw new AppException(ResponseCode.UN_ERROR,"营销服务锁单失败");
         if (!"E0000".equals(lockedMarketResponse.getCode())) {
             log.error("=======营销服务锁单响应结果异常:code:{}，info:{}=========", lockedMarketResponse.getCode(), lockedMarketResponse.getInfo());
-            throw new AppException(ResponseCode.UN_ERROR.getCode(),"营销服务锁单失败");
+            throw new AppException(ResponseCode.UN_ERROR.getCode(),lockedMarketResponse.getInfo());
         }
         LockMarketPayOrderResponseDTO responseData = lockedMarketResponse.getData();
         GroupMarketProductPriceVO productPriceVO = GroupMarketProductPriceVO.builder()
                 .originalPrice(responseData.getOriginalPrice())
                 .deductionPrice(responseData.getDeductionPrice())
-                .payPrice(responseData.getPayPrice()).build();
+                .payPrice(responseData.getPayPrice())
+                .teamId(responseData.getTeamId()).build();
         log.info("=======营销服务锁单响应结果:originalPrice:{}，deductionPrice: {}, payPrice: {} =========",
                 productPriceVO.getOriginalPrice(),productPriceVO.getDeductionPrice(),productPriceVO.getPayPrice());
         return productPriceVO;
     }
 
     @Override
-    public void settlementMarketPayOrder(String userId, String orderId, LocalDateTime tradeTime) {
+    public void settlementMarketPayOrder(SettlementMarketPayOrderVO settlementVo) {
         SettlementMarketPayOrderRequestDTO requestDTO = new SettlementMarketPayOrderRequestDTO();
-        requestDTO.setSource("source");
-        requestDTO.setChannel("chanel");
-        requestDTO.setUserId(userId);
-        requestDTO.setOutTradeNo(orderId);
-        requestDTO.setOutTradeTime(tradeTime);
+        requestDTO.setSource(settlementVo.getSource());
+        requestDTO.setChannel(settlementVo.getChannel());
+        requestDTO.setUserId(settlementVo.getUserId());
+        requestDTO.setOutTradeNo(settlementVo.getOrderId());
+        requestDTO.setOutTradeTime(settlementVo.getTradeTime());
         Response<SettlementMarketPayOrderResponseDTO> settlementReq = marketTradeService.settleMarketPayOrder(requestDTO);
         if (ObjectUtils.isEmpty(settlementReq))
             return;
@@ -129,8 +132,8 @@ public class OrderPortImpl implements IOrderPort {
     }
 
     @Override
-    public String createAlipayPagePayOrder(String orderId, java.math.BigDecimal payAmount, String productName) {
-        return alipayRequestGateway.createPagePayOrder(orderId, payAmount, productName);
+    public String createAlipayPagePayOrder(String orderId, BigDecimal payAmount, String productName,String source, String channel) {
+        return alipayRequestGateway.createPagePayOrder(orderId, payAmount, productName, source, channel);
     }
 
 }

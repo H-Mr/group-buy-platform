@@ -26,7 +26,6 @@ public class InterceptorConfig implements WebMvcConfigurer {
                 .addPathPatterns("/api/v1/**")
                 // 排除登录接口,刷新token接口
                 .excludePathPatterns("/api/v1/login/**")
-                .excludePathPatterns("/api/v1/login/refresh_token")
                 // 排除第三方回调接口
                 .excludePathPatterns("/api/v1/weixin/portal/**")
                 .excludePathPatterns("/api/v1/alipay/alipay_notify_url")

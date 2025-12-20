@@ -3,7 +3,9 @@ package cn.hjw.dev.platform.domain.order.adapter.port;
 import cn.hjw.dev.platform.domain.order.model.entity.ProductEntity;
 import cn.hjw.dev.platform.domain.order.model.valobj.GroupMarketProductPriceVO;
 import cn.hjw.dev.platform.domain.order.model.valobj.LockMarketPayOrderVO;
+import cn.hjw.dev.platform.domain.order.model.valobj.SettlementMarketPayOrderVO;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public interface IOrderPort {
@@ -24,11 +26,8 @@ public interface IOrderPort {
 
     /**
      * 结算营销订单
-     * @param userId 结算的用户ID
-     * @param orderId 结算的订单ID
-     * @param tradeTime 交易时间
      */
-    void settlementMarketPayOrder(String userId, String orderId, LocalDateTime tradeTime);
+    void settlementMarketPayOrder(SettlementMarketPayOrderVO settlementVo);
 
     /**
      * 创建支付宝页面支付订单
@@ -37,5 +36,5 @@ public interface IOrderPort {
      * @param productName 商品名称
      * @return 支付宝页面支付表单字符串
      */
-    String createAlipayPagePayOrder(String orderId, java.math.BigDecimal payAmount, String productName);
+    String createAlipayPagePayOrder(String orderId, BigDecimal payAmount, String productName,String source, String channel);
 }

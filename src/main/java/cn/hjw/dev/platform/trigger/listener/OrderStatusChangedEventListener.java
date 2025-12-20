@@ -36,14 +36,18 @@ public class OrderStatusChangedEventListener {
         }
         // 第二步：安全强转
         OrderStatusChangedEventType.ChangedOrder order = (OrderStatusChangedEventType.ChangedOrder) payload;
+        try {
 
-        log.info("接收到订单操作变更事件，订单ID：{}，订单状态：{}", order.getOrderId(), order.getOrderStatus());
-        if(OrderStatusVO.CLOSE.equals(order.getOrderStatus())) {
-            // 超时关单
-            orderService.changeOrderClose(order.getOrderId());
-        } else {
-            // 补充支付成功
-            orderService.changeOrderPaySuccess(order.getOrderId(), order.getPaySuccessTime());
+            log.info("接收到订单操作变更事件，订单ID：{}，订单状态：{}", order.getOrderId(), order.getOrderStatus());
+            if(OrderStatusVO.CLOSE.equals(order.getOrderStatus())) {
+                // 超时关单
+                orderService.changeOrderClose(order.getOrderId());
+            } else {
+                // 补充支付成功
+                orderService.changeOrderPaySuccess(order.getOrderId(), order.getPaySuccessTime(),order.getSource(),order.getChannel());
+            }
+        } catch (Exception e) {
+            log.error("处理订单状态变更事件失败，订单ID：{}", order.getOrderId(), e);
         }
     }
 
